@@ -1,8 +1,8 @@
 # Imaginarium - Choose Your Own Adventure Story Generator
 
-🎨 **Imaginarium** is a magical web app that creates interactive, choose-your-own-adventure stories for children ages 6-12. Simply input your story idea, and watch as your imagination comes to life with dynamic pages, beautiful illustrations, and endless possibilities!
+**Imaginarium** is a magical web app that creates interactive, choose-your-own-adventure stories for children ages 6-12. Simply input your story idea, and watch as your imagination comes to life with dynamic pages, beautiful illustrations, and endless possibilities!
 
-## ✨ Features
+## Features
 
 - **Dynamic Story Generation**: Create unlimited story pages based on user input
 - **Beautiful UI**: Warm, playful design with smooth animations
@@ -12,7 +12,7 @@
 - **Navigation Controls**: Back, Next, and Restart Story buttons
 - **Real-time Generation**: Each user response creates a new story page
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Python 3.7 or higher
@@ -46,7 +46,7 @@
 5. **Open your browser**
    Navigate to `http://localhost:5000` and start creating stories!
 
-## 🎮 How to Use
+## How to Use
 
 1. **Start Your Story**: Enter your story idea in the text area (e.g., "a brave knight", "a magical forest", "a space adventure")
 
@@ -58,12 +58,23 @@
 
 5. **Enjoy**: Watch as your story unfolds with beautiful illustrations and engaging text!
 
-## 🏗️ Architecture
+## Architecture
 
-### Frontend (`src/`)
-- **`index.html`**: Main HTML structure with landing and story screens
-- **`style.css`**: Warm, playful styling with animations and responsive design
-- **`script.js`**: Dynamic page management, navigation, and API integration
+### Frontend (Modular Structure)
+- **`index.html`**: Main HTML structure with all screens
+- **`static/css/`**: Modular CSS architecture
+  - `base.css`: Base styles, typography, buttons, animations
+  - `layout.css`: Layout and screen management
+  - `pages/intro.css`: Introduction page styles
+  - `pages/story.css`: Story page styles  
+  - `pages/conclusion.css`: Conclusion page styles
+- **`static/js/`**: Modular JavaScript architecture
+  - `main.js`: Main application controller
+  - `ui.js`: UI rendering and DOM updates
+  - `storyManager.js`: Story management with MAX_PAGES = 5
+  - `pages/introPage.js`: Introduction page functionality
+  - `pages/storyPage.js`: Story page functionality
+  - `pages/conclusionPage.js`: Conclusion page functionality
 
 ### Backend (`app.py`)
 - **Flask Server**: Serves static files and handles API requests
@@ -71,7 +82,7 @@
 - **Image Generation**: Placeholder system for story illustrations
 - **CORS Enabled**: Allows frontend-backend communication
 
-## 🎨 Design Philosophy
+## Design Philosophy
 
 The interface embodies the theme: **"Powerful solutions bring us closer and help us thrive"**
 
@@ -80,13 +91,13 @@ The interface embodies the theme: **"Powerful solutions bring us closer and help
 - **Warm**: Bright, inviting colors and friendly typography
 - **Inspiring**: Encourages creativity, exploration, and belonging
 
-## 🔧 API Endpoints
+## API Endpoints
 
 - `GET /` - Serves the main application
 - `POST /api/generate-story` - Generates story content based on user input
 - `POST /api/generate-image` - Generates placeholder images for story pages
 
-## 🛠️ Customization
+## Customization
 
 ### Adding Real Image Generation
 Replace the placeholder image system in `app.py` with your preferred image generation service:
@@ -113,14 +124,14 @@ Customize story generation prompts in `app.py`:
 prompt = f"""Your custom prompt here..."""
 ```
 
-## 📱 Browser Support
+## Browser Support
 
 - Chrome 80+
 - Firefox 75+
 - Safari 13+
 - Edge 80+
 
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch
@@ -128,11 +139,11 @@ prompt = f"""Your custom prompt here..."""
 4. Test thoroughly
 5. Submit a pull request
 
-## 📄 License
+## License
 
 This project is open source and available under the MIT License.
 
-## 🎯 Future Enhancements
+## Future Enhancements
 
 - Real AI-generated illustrations
 - Story sharing and saving
@@ -143,4 +154,4 @@ This project is open source and available under the MIT License.
 
 ---
 
-**Built with ❤️ for young storytellers everywhere!**
+**Built with love for young storytellers everywhere!**
