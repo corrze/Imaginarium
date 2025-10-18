@@ -1,9 +1,11 @@
-from google import genai
-from google.genai import types
-from google.genai.errors import ClientError
-from PIL import Image
-from io import BytesIO
+from flask import Flask, request, jsonify, send_from_directory
+from flask_cors import CORS
+import google.generativeai as genai
+import json
 import os
+
+app = Flask(__name__)
+CORS(app)  # Enable CORS for frontend communication
 
 # --- Load .env if present ---
 try:
@@ -14,61 +16,107 @@ except Exception:
 
 api_key = os.getenv("GOOGLE_API_KEY")
 if not api_key:
-    raise RuntimeError("Missing GOOGLE_API_KEY env var")
-
-client = genai.Client(api_key=api_key)
+    print("Warning: Missing GOOGLE_API_KEY env var. Using mock data.")
+    client = None
+else:
+    genai.configure(api_key=api_key)
+    client = genai.GenerativeModel('gemini-2.5-flash')
+    print("✅ Google AI client initialized successfully")
 
 # --- Smoke test (text model works without quota issues) ---
-try:
-    resp = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents="Say hello!"
-    )
-    print(resp.text)
-except ClientError as e:
-    print(f"[Error] Text model failed: {e}")
-    exit(1)
+if client:
+    try:
+        resp = client.generate_content("Say hello!")
+        print("✅ Text model test successful:", resp.text)
+    except Exception as e:
+        print(f"[Error] Text model failed: {e}")
+        client = None
 
-# --- Attempt image generation with graceful fallback ---
-from google.genai.errors import ClientError
+@app.route('/')
+def serve_index():
+    """Serve the main HTML file"""
+    return send_from_directory('.', 'index.html')
 
-prompt = (
-    "Create a picture of a nano banana dish in a fancy restaurant with a Gemini theme"
-)
+@app.route('/static/<path:filename>')
+def serve_static(filename):
+    """Serve static files (CSS, JS)"""
+    return send_from_directory('static', filename)
 
-try:
-    response = client.models.generate_content(
-        model="gemini-2.5-flash-image",
-        contents=[prompt],
-    )
+@app.route('/api/generate-story', methods=['POST'])
+def generate_story():
+    """Generate a new story page based on user input"""
+    try:
+        data = request.get_json()
+        story_idea = data.get('storyIdea', '')
+        user_response = data.get('userResponse', None)
+        page_number = data.get('pageNumber', 1)
+        
+        if not story_idea:
+            return jsonify({'error': 'Story idea is required'}), 400
+        
+        # Generate story content using Google AI
+        if client:
+            if page_number == 1:
+                prompt = f"""Create the beginning of a children's story (ages 6-12) based on this idea: "{story_idea}". 
+                Write 2-3 sentences that introduce the main character and setting. Make it engaging and age-appropriate."""
+            else:
+                prompt = f"""Continue this children's story based on the user's response: "{user_response}". 
+                Write 2-3 sentences that advance the plot. Make it engaging and age-appropriate for ages 6-12."""
+            
+            response = client.generate_content(prompt)
+            story_text = response.text.strip()
+        else:
+            # Fallback to mock data
+            if page_number == 1:
+                story_text = f"Once upon a time, in a magical world filled with wonder, there was a brave adventurer who discovered something amazing: \"{story_idea}\". The journey was about to begin, and every choice would shape the destiny of this incredible tale."
+            else:
+                responses = [
+                    'The brave adventurer decided to explore the mysterious path ahead.',
+                    'A wise old wizard appeared with an important message.',
+                    'The adventurer discovered a hidden treasure chest.',
+                    'A friendly dragon offered to help on the journey.',
+                    'The path led to a magical forest filled with talking animals.'
+                ]
+                random_response = responses[page_number % len(responses)]
+                story_text = f"Following the previous adventure, {random_response} This opened up new possibilities and exciting challenges ahead."
+        
+        # Generate a prompt for the next user input
+        next_prompt = "What happens next in your adventure? Choose something exciting!"
+        
+        return jsonify({
+            'success': True,
+            'storyText': story_text,
+            'promptText': next_prompt,
+            'pageNumber': page_number
+        })
+        
+    except Exception as e:
+        print(f"Error generating story: {str(e)}")
+        return jsonify({'error': 'Failed to generate story'}), 500
 
-    image_saved = False
-    for cand in response.candidates:
-        for part in cand.content.parts:
-            if getattr(part, "text", None):
-                print(part.text)
-            elif getattr(part, "inline_data", None) and getattr(part.inline_data, "data", None):
-                image = Image.open(BytesIO(part.inline_data.data))
-                image.save("generated_image.png")
-                print("✅ Image saved as generated_image.png")
-                image_saved = True
-                break
-        if image_saved:
-            break
+@app.route('/api/generate-image', methods=['POST'])
+def generate_image():
+    """Generate an image for the story page"""
+    try:
+        data = request.get_json()
+        story_text = data.get('storyText', '')
+        page_number = data.get('pageNumber', 1)
+        
+        # For now, return a placeholder image URL
+        # In a real implementation, you would generate an actual image
+        colors = ['6c5ce7', '74b9ff', 'fd79a8', 'fdcb6e', '00b894', 'e17055']
+        color = colors[page_number % len(colors)]
+        
+        image_url = f"https://via.placeholder.com/400x300/{color}/ffffff?text=Story+Page+{page_number}"
+        
+        return jsonify({
+            'success': True,
+            'imageUrl': image_url
+        })
+        
+    except Exception as e:
+        print(f"Error generating image: {str(e)}")
+        return jsonify({'error': 'Failed to generate image'}), 500
 
-    if not image_saved:
-        print("⚠️ No image data returned by the model.")
-
-except ClientError as e:
-    # safer attribute access
-    code = getattr(e, "code", None) or getattr(e, "status_code", None)
-    if code == 429 or "RESOURCE_EXHAUSTED" in str(e):
-        print("⚠️ Image generation quota exceeded (free tier has 0 quota for images).")
-        print("   → Enable billing in Google AI Studio or use Vertex AI for images.")
-    elif code == 403 or "PERMISSION_DENIED" in str(e):
-        print("🚫 Access denied. Check that your API key has the Gemini API enabled.")
-    else:
-        print(f"❌ Unexpected error: {e}")
-except Exception as e:
-    print(f"❌ Unknown error: {e}")
-
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=5000)

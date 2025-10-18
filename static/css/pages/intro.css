@@ -1,0 +1,21 @@
+/* pages/intro.css - Introduction page styles */
+
+.intro-content {
+    animation: fadeInUp 0.8s ease-out 0.9s both;
+}
+
+.intro-title {
+    animation: bounceIn 1s ease-out 0.3s both;
+}
+
+.intro-tagline {
+    animation: fadeInUp 0.8s ease-out 0.6s both;
+}
+
+.intro-input-container {
+    margin-bottom: 30px;
+}
+
+.intro-create-button {
+    margin-top: 20px;
+}
