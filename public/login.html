@@ -118,29 +118,6 @@
                                 required
                             >
                         </div>
-
-                        <div class="form-group">
-                            <label class="form-label">Account Type</label>
-                            <div class="radio-group">
-                                <label class="radio-label">
-                                    <input type="radio" name="account-type" value="adult" checked> Adult Account
-                                </label>
-                                <label class="radio-label">
-                                    <input type="radio" name="account-type" value="child"> Child Account
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <div id="parent-email-container" class="form-group" style="display: none;">
-                            <label for="parent-email" class="form-label">Parent's Email</label>
-                            <input 
-                                type="email" 
-                                id="parent-email" 
-                                name="parentEmail" 
-                                class="form-input"
-                                placeholder="Enter parent's email"
-                            >
-                        </div>
                         
                         <div class="form-actions">
                             <button type="submit" class="login-submit-btn">
@@ -212,16 +189,9 @@
             
             const email = document.getElementById('signup-email').value.trim();
             const password = document.getElementById('signup-password').value.trim();
-            const isChild = document.querySelector('input[name="account-type"]:checked').value === 'child';
-            const parentEmail = isChild ? document.getElementById('parent-email').value.trim() : null;
 
             if (!email || !password) {
                 alert('Please enter both email and password');
-                return;
-            }
-
-            if (isChild && !parentEmail) {
-                alert('Please enter parent email for child accounts');
                 return;
             }
 
@@ -233,8 +203,7 @@
                 // Store additional user information in Firestore
                 await setDoc(doc(db, "users", user.uid), {
                     email,
-                    isChild,
-                    parentEmail: isChild ? parentEmail : null,
+                    isChild: false,
                     membershipLevel: "Kids", // Default to free tier
                     membershipExpiry: null,
                     createdAt: new Date().toISOString()
@@ -254,15 +223,6 @@
         // Toggle between login and signup screens
         document.getElementById('create-account-btn').addEventListener('click', showSignupScreen);
         document.getElementById('back-to-login-btn').addEventListener('click', showLoginScreen);
-
-        // Show/hide parent email based on account type
-        const accountTypeRadios = document.querySelectorAll('input[name="account-type"]');
-        accountTypeRadios.forEach(radio => {
-            radio.addEventListener('change', function() {
-                const parentEmailContainer = document.getElementById('parent-email-container');
-                parentEmailContainer.style.display = this.value === 'child' ? 'block' : 'none';
-            });
-        });
 
         // Back to about button
         document.getElementById('back-to-about').addEventListener('click', () => {
