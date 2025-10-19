@@ -99,36 +99,6 @@ def test_static():
     except Exception as e:
         return f"Error: {e}", 404
 
-@app.route('/api/list-models', methods=['GET'])
-def list_models():
-    """List available models for debugging"""
-    try:
-        if not client:
-            return jsonify({'error': 'Client not initialized'}), 500
-        
-        # Try to list available models
-        models = client.models.list()
-        
-        model_list = []
-        for model in models:
-            model_list.append({
-                'name': model.name,
-                'display_name': getattr(model, 'display_name', 'N/A'),
-                'description': getattr(model, 'description', 'N/A')[:100] if hasattr(model, 'description') else 'N/A'
-            })
-        
-        return jsonify({
-            'success': True,
-            'models': model_list,
-            'count': len(model_list)
-        })
-        
-    except Exception as e:
-        print(f"Error listing models: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        return jsonify({'error': str(e)}), 500
-
 @app.route('/api/generate-story', methods=['POST'])
 def generate_story():
     """Generate a new story page based on user input"""
@@ -344,93 +314,6 @@ def payment_success():
 def payment_cancel():
     """Handle cancelled payment"""
     return render_template('pro.html')
-
-def generate_with_gemini_imagen(prompt, page_number):
-    """
-    Generate image using Gemini's Imagen API.
-    Uses the same API key as text generation - no Vertex AI needed!
-    """
-    try:
-        if not image_client:
-            raise Exception("Image client not initialized")
-        
-        print(f"Generating image with Imagen for page {page_number}...")
-        
-        # Generate image using Gemini API
-        response = image_client.models.generate_images(
-            model='imagen-4.0-generate-001',
-            prompt=prompt,
-            config=types.GenerateImagesConfig(
-                number_of_images=1,
-                safety_filter_level='block_low_and_above',  # Fixed: use correct safety level
-                person_generation='allow_adult',   # Allow people in images
-                aspect_ratio='16:9',  # Good for storybook pages
-            )
-        )
-        
-        # Debug: Print response details
-        print(f"Response received. Has generated_images: {hasattr(response, 'generated_images')}")
-        if hasattr(response, 'generated_images'):
-            print(f"Number of images: {len(response.generated_images) if response.generated_images else 0}")
-        
-        # Check for safety filter or other blocking
-        if hasattr(response, 'blocked_reason'):
-            print(f"⚠️ Image generation blocked! Reason: {response.blocked_reason}")
-            return None
-        
-        # Get the first generated image
-        if response.generated_images and len(response.generated_images) > 0:
-            generated_image = response.generated_images[0]
-            
-            # Check if this specific image was blocked
-            if hasattr(generated_image, 'blocked_reason') and generated_image.blocked_reason:
-                print(f"⚠️ Image blocked by safety filter: {generated_image.blocked_reason}")
-                return None
-            
-            # Save image to static folder
-            filename = f"story_page_{page_number}_{hash(prompt) % 100000}.png"
-            filepath = os.path.join('public', 'static', 'images', filename)
-            os.makedirs(os.path.dirname(filepath), exist_ok=True)
-            
-            # The image object might be different types depending on the API version
-            # Try different save methods
-            try:
-                # Method 1: If it's already a PIL Image
-                if hasattr(generated_image.image, 'save'):
-                    generated_image.image.save(filepath)
-                else:
-                    # Method 2: If it has image_bytes
-                    if hasattr(generated_image, 'image_bytes'):
-                        with open(filepath, 'wb') as f:
-                            f.write(generated_image.image_bytes)
-                    # Method 3: If image has a _pil_image attribute
-                    elif hasattr(generated_image.image, '_pil_image'):
-                        generated_image.image._pil_image.save(filepath)
-                    else:
-                        # Last resort: try to write the image object directly
-                        with open(filepath, 'wb') as f:
-                            f.write(bytes(generated_image.image))
-            except Exception as save_error:
-                print(f"Error saving with standard methods: {save_error}")
-                # Debug: print what type the image actually is
-                print(f"Image type: {type(generated_image.image)}")
-                print(f"Image attributes: {dir(generated_image.image)}")
-                raise
-            
-            print(f"✅ Image saved to {filepath}")
-            
-            return f"/static/images/{filename}"
-        
-        print("⚠️ No images generated - empty response")
-        print(f"Full response: {response}")
-        return None
-        
-    except Exception as e:
-        print(f"Gemini Imagen error: {e}")
-        import traceback
-        traceback.print_exc()
-        return None
-
 
 if __name__ == '__main__':
     # Create images directory if it doesn't exist
