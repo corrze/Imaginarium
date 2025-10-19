@@ -86,49 +86,24 @@
 
     <!-- JavaScript for login functionality -->
     <script>
-        // Simple login validation (replace with real authentication)
-        document.getElementById('login-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            
-            // Simple demo validation - replace with real authentication
-            if (username && password) {
-                // Hide login screen and show dashboard
-                document.getElementById('login-screen').classList.remove('active');
-                document.getElementById('pro-dashboard').classList.add('active');
-            } else {
-                alert('Please enter both username and password');
-            }
-        });
+    document.getElementById('login-form').addEventListener('submit', function(e) {
+    e.preventDefault(); // stop form refresh
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value.trim();
 
-        // Back to About page
-        document.getElementById('back-to-about').addEventListener('click', function() {
-            window.location.href = 'index.html';
-        });
+    if (!username || !password) {
+        alert('Please enter both email and password');
+        return;
+    }
 
-        // Start Pro Generator (redirect to main page with pro features)
-        document.getElementById('start-pro-generator').addEventListener('click', function() {
-            window.location.href = 'index.html?pro=true';
-        });
+    // ✅ Navigate to Pro page after login
+    window.location.href = 'pro.html';
+    });
 
-        // Logout functionality
-        document.getElementById('logout-btn').addEventListener('click', function() {
-            window.location.href = 'pro.html';
-            
-            // Clear form
-            document.getElementById('login-form').reset();
-        });
-
-        // Create Account functionality
-        document.getElementById('create-account-btn').addEventListener('click', function() {
-            // For demo purposes, we'll just show an alert
-            // In a real app, this would redirect to a registration page or show a registration form
-            alert('Create Account feature coming soon! For now, you can use any username and password to login.');
-        });
-
-
+    // Back button
+    document.getElementById('back-to-about').addEventListener('click', () => {
+    window.location.href = 'index.html';
+    });
     </script>
 </body>
 </html>
