@@ -4,81 +4,67 @@ import { getFirestore, doc, updateDoc } from "https://www.gstatic.com/firebasejs
 import { app, auth, db } from '../../firebase-config.js';
 
 document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOM loaded, attaching event listener to upgrade button");
     const upgradeBtn = document.getElementById('upgrade-btn');
     
     if (upgradeBtn) {
-        upgradeBtn.addEventListener('click', handleUpgrade);
+        console.log("Upgrade button found");
+        upgradeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log("Button clicked");
+            handleUpgrade();
+        });
+    } else {
+        console.error("Upgrade button not found");
     }
 });
 
 async function handleUpgrade() {
-  const button = document.getElementById('upgrade-btn');
-  const originalHTML = button.innerHTML;
+    console.log("handleUpgrade called");
+    const button = document.getElementById('upgrade-btn');
+    const originalHTML = button.innerHTML;
 
-  button.innerHTML = '<span>Processing...</span>';
-  button.disabled = true;
-
-  try {
-    // Check if user is logged in
-    const user = auth.currentUser;
-    if (!user) {
-      throw new Error('Please log in to upgrade to Pro');
-    }
+    button.innerHTML = '<span>Processing...</span>';
+    button.disabled = true;
 
     try {
-      // First try the Flask route
-      console.log("Trying to use Flask checkout endpoint...");
-      const response = await fetch(`${location.origin}/create-checkout-session`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          priceId: 'price_pro_monthly',
-          successUrl: `${location.origin}/success`,
-          cancelUrl: `${location.origin}/pro.html`
-        })
-      });
+        // Check if user is logged in
+        const user = auth.currentUser;
+        if (!user) {
+            console.log("No user logged in");
+            throw new Error('Please log in to upgrade to Pro');
+        }
 
-      const data = await response.json();
-      
-      if (data.url) {
-        console.log("Got checkout URL from server:", data.url);
-        window.location.href = data.url;
-        return; // Exit function if successful
-      }
+        console.log("User is logged in:", user.uid);
+
+        // Update Firebase directly
+        console.log("Updating Firebase document");
+        await updateDoc(doc(db, "users", user.uid), {
+            membershipLevel: "Pro",
+            membershipExpiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), 
+            lastUpdated: new Date().toISOString()
+        });
+        
+        console.log("Firebase update successful");
+        showSuccess('Successfully upgraded to Pro! Redirecting...');
+        
+        // Simple redirect with timeout
+        console.log("Setting timeout for redirect");
+        setTimeout(() => {
+            console.log("Redirecting to implemented.html");
+            window.location.href = '/success';
+        }, 2000);
+        
     } catch (error) {
-      console.log("Flask checkout failed, falling back to Firebase:", error);
-      // Continue with Firebase method if Flask route fails
+        console.error('Error upgrading to Pro:', error);
+        showError(error.message || 'Failed to upgrade. Please try again.');
+        button.innerHTML = originalHTML;
+        button.disabled = false;
     }
-
-    // Fallback: Use Firebase directly
-    console.log("Using Firebase fallback method...");
-    await updateDoc(doc(db, "users", user.uid), {
-      membershipLevel: "Pro",
-      membershipExpiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
-      lastUpdated: new Date().toISOString()
-    });
-    
-    showSuccess('Successfully upgraded to Pro! Redirecting...');
-    
-    // Redirect to implemented.html
-    setTimeout(() => {
-      window.location.href = 'implemented.html';
-    }, 2000);
-    
-  } catch (error) {
-    console.error('Error upgrading to Pro:', error);
-    
-    // Show error message
-    showError(error.message || 'Failed to upgrade. Please try again.');
-    
-    // Reset button
-    button.innerHTML = originalHTML;
-    button.disabled = false;
-  }
 }
 
 function showError(message) {
-    // Create error notification
+    console.log("Showing error:", message);
     const errorDiv = document.createElement('div');
     errorDiv.style.cssText = `
         position: fixed;
@@ -98,7 +84,6 @@ function showError(message) {
     
     document.body.appendChild(errorDiv);
     
-    // Remove after 5 seconds
     setTimeout(() => {
         errorDiv.style.animation = 'slideOutRight 0.3s ease-out';
         setTimeout(() => errorDiv.remove(), 300);
@@ -106,7 +91,7 @@ function showError(message) {
 }
 
 function showSuccess(message) {
-    // Create success notification
+    console.log("Showing success:", message);
     const successDiv = document.createElement('div');
     successDiv.style.cssText = `
         position: fixed;
@@ -126,7 +111,6 @@ function showSuccess(message) {
     
     document.body.appendChild(successDiv);
     
-    // Remove after 5 seconds
     setTimeout(() => {
         successDiv.style.animation = 'slideOutRight 0.3s ease-out';
         setTimeout(() => successDiv.remove(), 300);

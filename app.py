@@ -343,6 +343,25 @@ def create_checkout_session():
         # still return a safe URL so the button “does something”
         return jsonify({'url': f"{request.url_root}success?mock=true", 'mock': True, 'error': str(e)}), 200
 
+@app.route('/api/upgrade-to-pro', methods=['POST'])
+def upgrade_to_pro():
+    """Directly upgrade a user to Pro (for hackathon demo)"""
+    try:
+        data = request.get_json() or {}
+        user_id = data.get('userId')
+        
+        if not user_id:
+            return jsonify({'error': 'User ID is required'}), 400
+            
+        # In a real app, you'd update your database here
+        # For a hackathon, just return success
+        return jsonify({
+            'success': True,
+            'redirectUrl': '/success'
+        })
+    except Exception as e:
+        print(f"Error upgrading user: {e}")
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/pro')
 def pro_paywall():
