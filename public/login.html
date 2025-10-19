@@ -138,127 +138,112 @@
 
     <!-- Firebase SDK -->
     <script type="module">
-        // Import the functions you need from the SDKs
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    // Import Firebase modules
+    import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+    import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    import { app, auth, db } from './firebase-config.js';
 
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyA3QP1hhLju2ySnijIi-5_bItxl_C-7fxY",
-            authDomain: "imaginarium-cb20a.firebaseapp.com",
-            projectId: "imaginarium-cb20a",
-            storageBucket: "imaginarium-cb20a.appspot.com",
-            messagingSenderId: "823978245551",
-            appId: "1:823978245551:web:cd7f655e3b4bec2565035a"
-        };
+    // Login functionality
+    document.getElementById('login-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const email = document.getElementById('login-email').value.trim();
+        const password = document.getElementById('login-password').value.trim();
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        if (!email || !password) {
+            alert('Please enter both email and password');
+            return;
+        }
 
-        // Login functionality
-        document.getElementById('login-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
+        try {
+            // Sign in with Firebase
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+            console.log('User logged in:', user);
             
-            const email = document.getElementById('login-email').value.trim();
-            const password = document.getElementById('login-password').value.trim();
-
-            if (!email || !password) {
-                alert('Please enter both email and password');
-                return;
-            }
-
-            try {
-                // Sign in with Firebase
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-                console.log('User logged in:', user);
+            // Check membership level
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            
+            if (userDoc.exists()) {
+                const userData = userDoc.data();
+                console.log("User data:", userData);
                 
-                // Check membership level (getDoc is already imported at the top)
-                const userDoc = await getDoc(doc(db, "users", user.uid));
-                
-                if (userDoc.exists()) {
-                    const userData = userDoc.data();
-                    console.log("User data:", userData);
-                    
-                    // Redirect based on membership level
-                    if (userData.membershipLevel === "Pro") {
-                        console.log("Pro user detected, redirecting to implemented.html");
-                        window.location.href = 'implemented.html';
-                    } else if (userData.membershipLevel === "Kids") {
-                        console.log("Kids membership detected, redirecting to pro.html");
-                        window.location.href = 'pro.html';
-                    } else {
-                        console.log("Unknown membership level, redirecting to index.html");
-                        window.location.href = 'index.html';
-                    }
+                // Redirect based on membership level
+                if (userData.membershipLevel === "Pro") {
+                    console.log("Pro user detected, redirecting to implemented.html");
+                    window.location.href = 'implemented.html';
+                } else if (userData.membershipLevel === "Kids") {
+                    console.log("Kids membership detected, redirecting to pro.html");
+                    window.location.href = 'pro.html';
                 } else {
-                    console.log("User document not found, redirecting to index.html");
+                    console.log("Unknown membership level, redirecting to index.html");
                     window.location.href = 'index.html';
                 }
-            } catch (error) {
-                console.error('Login error:', error);
-                alert('Login failed: ' + error.message);
+            } else {
+                console.log("User document not found, redirecting to index.html");
+                window.location.href = 'index.html';
             }
-        });
+        } catch (error) {
+            console.error('Login error:', error);
+            alert('Login failed: ' + error.message);
+        }
+    });
 
-        // Signup functionality
-        document.getElementById('signup-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
+    // Signup functionality
+    document.getElementById('signup-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const email = document.getElementById('signup-email').value.trim();
+        const password = document.getElementById('signup-password').value.trim();
+
+        if (!email || !password) {
+            alert('Please enter both email and password');
+            return;
+        }
+
+        try {
+            // Create user with Firebase
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
             
-            const email = document.getElementById('signup-email').value.trim();
-            const password = document.getElementById('signup-password').value.trim();
-
-            if (!email || !password) {
-                alert('Please enter both email and password');
-                return;
-            }
-
-            try {
-                // Create user with Firebase
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-                
-                // Store additional user information in Firestore
-                await setDoc(doc(db, "users", user.uid), {
-                    email,
-                    isChild: false,
-                    membershipLevel: "Kids", // Default to free tier
-                    membershipExpiry: null,
-                    createdAt: new Date().toISOString()
-                });
-                
-                console.log('User registered:', user);
-                alert('Account created successfully!');
-                
-                // Switch back to login screen
-                showLoginScreen();
-            } catch (error) {
-                console.error('Signup error:', error);
-                alert('Registration failed: ' + error.message);
-            }
-        });
-
-        // Toggle between login and signup screens
-        document.getElementById('create-account-btn').addEventListener('click', showSignupScreen);
-        document.getElementById('back-to-login-btn').addEventListener('click', showLoginScreen);
-
-        // Back to about button
-        document.getElementById('back-to-about').addEventListener('click', () => {
-            window.location.href = 'index.html';
-        });
-
-        function showLoginScreen() {
-            document.getElementById('signup-screen').classList.remove('active');
-            document.getElementById('login-screen').classList.add('active');
+            // Store additional user information in Firestore
+            await setDoc(doc(db, "users", user.uid), {
+                email,
+                isChild: false,
+                membershipLevel: "Kids", // Default to free tier
+                membershipExpiry: null,
+                createdAt: new Date().toISOString()
+            });
+            
+            console.log('User registered:', user);
+            alert('Account created successfully!');
+            
+            // Switch back to login screen
+            showLoginScreen();
+        } catch (error) {
+            console.error('Signup error:', error);
+            alert('Registration failed: ' + error.message);
         }
+    });
 
-        function showSignupScreen() {
-            document.getElementById('login-screen').classList.remove('active');
-            document.getElementById('signup-screen').classList.add('active');
-        }
+    // Toggle between login and signup screens
+    document.getElementById('create-account-btn').addEventListener('click', showSignupScreen);
+    document.getElementById('back-to-login-btn').addEventListener('click', showLoginScreen);
+
+    // Back to about button
+    document.getElementById('back-to-about').addEventListener('click', () => {
+        window.location.href = 'index.html';
+    });
+
+    function showLoginScreen() {
+        document.getElementById('signup-screen').classList.remove('active');
+        document.getElementById('login-screen').classList.add('active');
+    }
+
+    function showSignupScreen() {
+        document.getElementById('login-screen').classList.remove('active');
+        document.getElementById('signup-screen').classList.add('active');
+    }
     </script>
 </body>
 </html>
