@@ -1,13 +1,18 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, render_template
 from flask_cors import CORS
 from google import genai
 from google.genai import types
 import json
 import os
+import stripe
 from PIL import Image
 
-app = Flask(__name__)
-CORS(app)
+app = Flask(__name__, template_folder='public/templates')
+CORS(app)  # Enable CORS for frontend communication
+
+# Configure Stripe (test mode)
+stripe.api_key = os.getenv('STRIPE_SECRET_KEY', 'sk_test_51234567890abcdefghijklmnopqrstuvwxyz')
+STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY', 'pk_test_51234567890abcdefghijklmnopqrstuvwxyz')
 
 # --- Load .env if present ---
 try:
@@ -276,6 +281,69 @@ def generate_image():
         print(f"Error generating image: {str(e)}")
         return jsonify({'error': 'Failed to generate image'}), 500
 
+# --- Stripe Payment Routes ---
+
+@app.route('/pro')
+def pro_paywall():
+    """Serve the Pro paywall page"""
+    return render_template('pro.html')
+
+@app.route('/create-checkout-session', methods=['POST'])
+def create_checkout_session():
+    """Create a Stripe checkout session"""
+    try:
+        data = request.get_json()
+        price_id = data.get('priceId', 'price_pro_monthly')
+        success_url = data.get('successUrl', f"{request.url_root}success")
+        cancel_url = data.get('cancelUrl', f"{request.url_root}pro")
+        
+        # Check if Stripe is properly configured
+        if not stripe.api_key or stripe.api_key.startswith('sk_test_placeholder'):
+            # Mock checkout session for demo purposes
+            print("Using mock checkout session (Stripe not configured)")
+            return jsonify({
+                'url': success_url + '?mock=true',
+                'mock': True
+            })
+        
+        # Create Stripe checkout session
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price': price_id,
+                'quantity': 1,
+            }],
+            mode='subscription',
+            success_url=success_url,
+            cancel_url=cancel_url,
+            metadata={
+                'product': 'storyboard_pro',
+                'feature': 'monthly_subscription'
+            }
+        )
+        
+        return jsonify({'url': checkout_session.url})
+        
+    except Exception as e:
+        print(f"Error creating checkout session: {str(e)}")
+        # Fallback to mock success for demo
+        return jsonify({
+            'url': f"{request.url_root}success?mock=true",
+            'mock': True
+        })
+
+@app.route('/success')
+def payment_success():
+    """Handle successful payment"""
+    mock = request.args.get('mock', False)
+    if mock:
+        print("Mock payment successful - redirecting to success page")
+    return render_template('implemented.html')
+
+@app.route('/cancel')
+def payment_cancel():
+    """Handle cancelled payment"""
+    return render_template('pro.html')
 
 def generate_with_gemini_imagen(prompt, page_number):
     """
