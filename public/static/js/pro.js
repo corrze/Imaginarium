@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// public/static/js/pro.js
 async function handleUpgrade() {
   const button = document.getElementById('upgrade-btn');
   const originalHTML = button.innerHTML;
@@ -19,36 +20,34 @@ async function handleUpgrade() {
   button.disabled = true;
 
   try {
-    // 1) Require a signed-in Firebase user (client check)
     const user = auth.currentUser;
     if (!user) throw new Error('Please log in to upgrade to Pro');
 
-    // 2) Start Stripe Checkout via your Flask route
-    const res = await fetch('/create-checkout-session', {
+    // Use an absolute, same-origin URL to avoid any <base> tag surprises
+    const res = await fetch(`${location.origin}/create-checkout-session`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        priceId: 'price_pro_monthly',                 // <- your Stripe Price ID
-        successUrl: `${location.origin}/success`,     // <- where Stripe returns
-        cancelUrl:  `${location.origin}/pro.html`     // <- when user cancels
+        priceId: 'price_pro_monthly',
+        successUrl: `${location.origin}/success`,
+        cancelUrl:  `${location.origin}/pro.html`
       })
     });
 
-    const data = await res.json();
+    const data = await res.json().catch(() => ({}));
     if (!res.ok || !data.url) {
-      throw new Error(data.error || 'Failed to start checkout');
+      throw new Error(data.error || `Checkout failed (HTTP ${res.status})`);
     }
 
-    // 3) Redirect the browser to Stripe
     window.location.assign(data.url);
-
   } catch (err) {
-    console.error(err);
+    console.error('[Upgrade] ', err);
     showError(err.message || 'Upgrade failed. Please try again.');
     button.innerHTML = originalHTML;
     button.disabled = false;
   }
 }
+
 
 function showError(message) {
     // Create error notification
