@@ -320,47 +320,33 @@ def pro_paywall():
 
 @app.route('/create-checkout-session', methods=['POST'])
 def create_checkout_session():
-    """Create a Stripe checkout session"""
     try:
-        data = request.get_json()
-        price_id = data.get('priceId', 'price_pro_monthly')
+        data = request.get_json() or {}
+        price_id   = data.get('priceId', 'price_pro_monthly')
         success_url = data.get('successUrl', f"{request.url_root}success")
-        cancel_url = data.get('cancelUrl', f"{request.url_root}pro")
-        
-        # Check if Stripe is properly configured
+        cancel_url  = data.get('cancelUrl',  f"{request.url_root}pro.html")
+
+        app.logger.info(f"/create-checkout-session price={price_id} success={success_url} cancel={cancel_url}")
+
         if not stripe.api_key or stripe.api_key.startswith('sk_test_placeholder'):
-            # Mock checkout session for demo purposes
-            print("Using mock checkout session (Stripe not configured)")
-            return jsonify({
-                'url': success_url + '?mock=true',
-                'mock': True
-            })
-        
-        # Create Stripe checkout session
+            # no real key → always return a working URL for demos
+            return jsonify({'url': f"{success_url}?mock=true", 'mock': True})
+
         checkout_session = stripe.checkout.Session.create(
-            payment_method_types=['card'],
-            line_items=[{
-                'price': price_id,
-                'quantity': 1,
-            }],
             mode='subscription',
+            payment_method_types=['card'],
+            line_items=[{'price': price_id, 'quantity': 1}],
             success_url=success_url,
             cancel_url=cancel_url,
-            metadata={
-                'product': 'storyboard_pro',
-                'feature': 'monthly_subscription'
-            }
+            metadata={'product':'storyboard_pro'}
         )
-        
         return jsonify({'url': checkout_session.url})
-        
+
     except Exception as e:
-        print(f"Error creating checkout session: {str(e)}")
-        # Fallback to mock success for demo
-        return jsonify({
-            'url': f"{request.url_root}success?mock=true",
-            'mock': True
-        })
+        app.logger.exception("create_checkout-session failed")
+        # still return a safe URL so the button “does something”
+        return jsonify({'url': f"{request.url_root}success?mock=true", 'mock': True, 'error': str(e)}), 200
+
 
 @app.route('/success')
 def payment_success():
