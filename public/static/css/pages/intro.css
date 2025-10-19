@@ -19,3 +19,28 @@
 .intro-create-button {
     margin-top: 20px;
 }
+
+/* About Us Link */
+.about-link-container {
+    margin-top: 1rem;
+    animation: fadeInUp 0.8s ease-out 0.9s both;
+}
+
+.about-link {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    color: #7f8c8d;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border: 2px solid #bdc3c7;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.about-link:hover {
+    color: #2c3e50;
+    border-color: #7f8c8d;
+    background: rgba(127, 140, 141, 0.1);
+    transform: translateY(-2px);
+}

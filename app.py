@@ -1,9 +1,11 @@
 from flask import Flask, request, jsonify, send_from_directory, render_template
 from flask_cors import CORS
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 import json
 import os
 import stripe
+from PIL import Image
 
 app = Flask(__name__, template_folder='public/templates')
 CORS(app)  # Enable CORS for frontend communication
@@ -20,22 +22,29 @@ except Exception:
     pass
 
 api_key = os.getenv("GOOGLE_API_KEY")
+
 if not api_key:
     print("Warning: Missing GOOGLE_API_KEY env var. Using mock data.")
     client = None
+    image_client = None
 else:
-    genai.configure(api_key=api_key)
-    client = genai.GenerativeModel('gemini-2.5-flash')
-    print("✅ Google AI client initialized successfully")
+    # Initialize Gemini client for both text and images
+    client = genai.Client(api_key=api_key)
+    image_client = client  # Same client can do both!
+    print("✅ Google Gemini client initialized successfully")
 
-# --- Smoke test (text model works without quota issues) ---
+# --- Smoke test ---
 if client:
     try:
-        resp = client.generate_content("Say hello!")
+        resp = client.models.generate_content(
+            model='gemini-2.0-flash-exp',
+            contents='Say hello!'
+        )
         print("✅ Text model test successful:", resp.text)
     except Exception as e:
         print(f"[Error] Text model failed: {e}")
         client = None
+        image_client = None
 
 @app.route('/')
 def serve_index():
@@ -52,7 +61,6 @@ def serve_static(filename):
         print(f"Error serving static file {filename}: {e}")
         return f"Error: {e}", 404
 
-# Alternative route for static files
 @app.route('/static/css/<filename>')
 def serve_css(filename):
     """Serve CSS files"""
@@ -73,6 +81,16 @@ def serve_js_pages(filename):
     """Serve JS page files"""
     return send_from_directory('public/static/js/pages', filename)
 
+@app.route('/static/images/<filename>')
+def serve_images(filename):
+    """Serve generated images"""
+    return send_from_directory('public/static/images', filename)
+
+@app.route('/firebase-config.js')
+def serve_firebase_config():
+    """Serve Firebase configuration"""
+    return send_from_directory('public', 'firebase-config.js')
+
 @app.route('/test-static')
 def test_static():
     """Test static file serving"""
@@ -80,6 +98,36 @@ def test_static():
         return send_from_directory('public/static', 'css/base.css')
     except Exception as e:
         return f"Error: {e}", 404
+
+@app.route('/api/list-models', methods=['GET'])
+def list_models():
+    """List available models for debugging"""
+    try:
+        if not client:
+            return jsonify({'error': 'Client not initialized'}), 500
+        
+        # Try to list available models
+        models = client.models.list()
+        
+        model_list = []
+        for model in models:
+            model_list.append({
+                'name': model.name,
+                'display_name': getattr(model, 'display_name', 'N/A'),
+                'description': getattr(model, 'description', 'N/A')[:100] if hasattr(model, 'description') else 'N/A'
+            })
+        
+        return jsonify({
+            'success': True,
+            'models': model_list,
+            'count': len(model_list)
+        })
+        
+    except Exception as e:
+        print(f"Error listing models: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/generate-story', methods=['POST'])
 def generate_story():
@@ -89,6 +137,7 @@ def generate_story():
         story_idea = data.get('storyIdea', '')
         user_response = data.get('userResponse', None)
         page_number = data.get('pageNumber', 1)
+        previous_story = data.get('previousStory', '')  # Track story history
         
         if not story_idea:
             return jsonify({'error': 'Story idea is required'}), 400
@@ -97,12 +146,24 @@ def generate_story():
         if client:
             if page_number == 1:
                 prompt = f"""Create the beginning of a children's story (ages 6-12) based on this idea: "{story_idea}". 
-                Write 2-3 sentences that introduce the main character and setting. Make it engaging and age-appropriate."""
+                Write 2-3 sentences that introduce the main character and setting. 
+                Make it engaging, age-appropriate, and visually descriptive.
+                Include vivid details about colors, characters, and the environment."""
             else:
-                prompt = f"""Continue this children's story based on the user's response: "{user_response}". 
-                Write 2-3 sentences that advance the plot. Make it engaging and age-appropriate for ages 6-12."""
+                prompt = f"""Continue this children's story:
+                
+Previous story: {previous_story}
+
+User's choice: "{user_response}"
+
+Write 2-3 sentences that continue the adventure based on their choice. 
+Make it engaging, age-appropriate for ages 6-12, and visually descriptive.
+Include vivid details about what's happening."""
             
-            response = client.generate_content(prompt)
+            response = client.models.generate_content(
+                model='gemini-2.0-flash-exp',
+                contents=prompt
+            )
             story_text = response.text.strip()
         else:
             # Fallback to mock data
@@ -133,24 +194,87 @@ def generate_story():
         print(f"Error generating story: {str(e)}")
         return jsonify({'error': 'Failed to generate story'}), 500
 
+
+def create_child_friendly_image_prompt(story_text):
+    """
+    Convert story text into a child-friendly image generation prompt.
+    This ensures images are appropriate, colorful, and engaging.
+    """
+    if client:
+        try:
+            prompt = f"""Based on this children's story text, create a detailed image description 
+            suitable for generating a children's book illustration:
+            
+            Story: {story_text}
+            
+            Create a description that:
+            - Is colorful and vibrant
+            - Is appropriate for children ages 6-12
+            - Focuses on the main scene/character
+            - Uses a cartoon or storybook illustration style
+            - Is positive and non-scary
+            
+            Provide only the image description, no extra text."""
+            
+            response = client.models.generate_content(
+                model='gemini-2.0-flash-exp',
+                contents=prompt
+            )
+            image_prompt = response.text.strip()
+            
+            # Add style modifiers for consistency
+            image_prompt = f"{image_prompt}, children's book illustration style, colorful, vibrant, friendly, cartoon style, whimsical"
+            
+            return image_prompt
+        except Exception as e:
+            print(f"Error creating image prompt: {e}")
+            return f"A colorful children's book illustration of: {story_text[:100]}, cartoon style, vibrant colors"
+    else:
+        return f"A colorful children's book illustration of: {story_text[:100]}, cartoon style, vibrant colors"
+
+
 @app.route('/api/generate-image', methods=['POST'])
 def generate_image():
-    """Generate an image for the story page"""
+    """
+    Generate an image for the story page using Gemini Imagen.
+    """
     try:
         data = request.get_json()
         story_text = data.get('storyText', '')
         page_number = data.get('pageNumber', 1)
         
-        # For now, return a placeholder image URL
-        # In a real implementation, you would generate an actual image
+        if not story_text:
+            return jsonify({'error': 'Story text is required'}), 400
+        
+        # Create a child-friendly image prompt
+        image_prompt = create_child_friendly_image_prompt(story_text)
+        print(f"Image prompt: {image_prompt}")
+        
+        # Try Gemini Imagen
+        try:
+            image_url = generate_with_gemini_imagen(image_prompt, page_number)
+            if image_url:
+                return jsonify({
+                    'success': True,
+                    'imageUrl': image_url,
+                    'method': 'gemini-imagen',
+                    'prompt': image_prompt
+                })
+        except Exception as e:
+            print(f"Gemini Imagen failed: {e}")
+            import traceback
+            traceback.print_exc()
+        
+        # Fallback to placeholder
         colors = ['6c5ce7', '74b9ff', 'fd79a8', 'fdcb6e', '00b894', 'e17055']
         color = colors[page_number % len(colors)]
-        
-        image_url = f"https://via.placeholder.com/400x300/{color}/ffffff?text=Story+Page+{page_number}"
+        image_url = f"https://via.placeholder.com/800x600/{color}/ffffff?text=Story+Page+{page_number}"
         
         return jsonify({
             'success': True,
-            'imageUrl': image_url
+            'imageUrl': image_url,
+            'method': 'placeholder',
+            'message': 'Imagen unavailable - using placeholder. Check API key and quota.'
         })
         
     except Exception as e:
@@ -221,5 +345,94 @@ def payment_cancel():
     """Handle cancelled payment"""
     return render_template('pro.html')
 
+def generate_with_gemini_imagen(prompt, page_number):
+    """
+    Generate image using Gemini's Imagen API.
+    Uses the same API key as text generation - no Vertex AI needed!
+    """
+    try:
+        if not image_client:
+            raise Exception("Image client not initialized")
+        
+        print(f"Generating image with Imagen for page {page_number}...")
+        
+        # Generate image using Gemini API
+        response = image_client.models.generate_images(
+            model='imagen-4.0-generate-001',
+            prompt=prompt,
+            config=types.GenerateImagesConfig(
+                number_of_images=1,
+                safety_filter_level='block_low_and_above',  # Fixed: use correct safety level
+                person_generation='allow_adult',   # Allow people in images
+                aspect_ratio='16:9',  # Good for storybook pages
+            )
+        )
+        
+        # Debug: Print response details
+        print(f"Response received. Has generated_images: {hasattr(response, 'generated_images')}")
+        if hasattr(response, 'generated_images'):
+            print(f"Number of images: {len(response.generated_images) if response.generated_images else 0}")
+        
+        # Check for safety filter or other blocking
+        if hasattr(response, 'blocked_reason'):
+            print(f"⚠️ Image generation blocked! Reason: {response.blocked_reason}")
+            return None
+        
+        # Get the first generated image
+        if response.generated_images and len(response.generated_images) > 0:
+            generated_image = response.generated_images[0]
+            
+            # Check if this specific image was blocked
+            if hasattr(generated_image, 'blocked_reason') and generated_image.blocked_reason:
+                print(f"⚠️ Image blocked by safety filter: {generated_image.blocked_reason}")
+                return None
+            
+            # Save image to static folder
+            filename = f"story_page_{page_number}_{hash(prompt) % 100000}.png"
+            filepath = os.path.join('public', 'static', 'images', filename)
+            os.makedirs(os.path.dirname(filepath), exist_ok=True)
+            
+            # The image object might be different types depending on the API version
+            # Try different save methods
+            try:
+                # Method 1: If it's already a PIL Image
+                if hasattr(generated_image.image, 'save'):
+                    generated_image.image.save(filepath)
+                else:
+                    # Method 2: If it has image_bytes
+                    if hasattr(generated_image, 'image_bytes'):
+                        with open(filepath, 'wb') as f:
+                            f.write(generated_image.image_bytes)
+                    # Method 3: If image has a _pil_image attribute
+                    elif hasattr(generated_image.image, '_pil_image'):
+                        generated_image.image._pil_image.save(filepath)
+                    else:
+                        # Last resort: try to write the image object directly
+                        with open(filepath, 'wb') as f:
+                            f.write(bytes(generated_image.image))
+            except Exception as save_error:
+                print(f"Error saving with standard methods: {save_error}")
+                # Debug: print what type the image actually is
+                print(f"Image type: {type(generated_image.image)}")
+                print(f"Image attributes: {dir(generated_image.image)}")
+                raise
+            
+            print(f"✅ Image saved to {filepath}")
+            
+            return f"/static/images/{filename}"
+        
+        print("⚠️ No images generated - empty response")
+        print(f"Full response: {response}")
+        return None
+        
+    except Exception as e:
+        print(f"Gemini Imagen error: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
+
+
 if __name__ == '__main__':
+    # Create images directory if it doesn't exist
+    os.makedirs('public/static/images', exist_ok=True)
     app.run(debug=True, host='0.0.0.0', port=5000)
