@@ -46,6 +46,20 @@
 5. **Open your browser**
    Navigate to `http://localhost:5000` and start creating stories!
 
+## Alternative: Frontend Only
+
+If you just want to test the frontend with mock data:
+
+```bash
+# Option 1: Direct HTML
+start src/index.html
+
+# Option 2: Development server
+cd src
+python run_frontend.py
+# Then visit: http://localhost:8000
+```
+
 ## How to Use
 
 1. **Start Your Story**: Enter your story idea in the text area (e.g., "a brave knight", "a magical forest", "a space adventure")
@@ -61,14 +75,14 @@
 ## Architecture
 
 ### Frontend (Modular Structure)
-- **`index.html`**: Main HTML structure with all screens
-- **`static/css/`**: Modular CSS architecture
+- **`src/index.html`**: Main HTML structure with all screens
+- **`src/static/css/`**: Modular CSS architecture
   - `base.css`: Base styles, typography, buttons, animations
   - `layout.css`: Layout and screen management
   - `pages/intro.css`: Introduction page styles
   - `pages/story.css`: Story page styles  
   - `pages/conclusion.css`: Conclusion page styles
-- **`static/js/`**: Modular JavaScript architecture
+- **`src/static/js/`**: Modular JavaScript architecture
   - `main.js`: Main application controller
   - `ui.js`: UI rendering and DOM updates
   - `storyManager.js`: Story management with MAX_PAGES = 5

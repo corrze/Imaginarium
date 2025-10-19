@@ -35,12 +35,46 @@ if client:
 @app.route('/')
 def serve_index():
     """Serve the main HTML file"""
-    return send_from_directory('.', 'index.html')
+    return send_from_directory('src', 'index.html')
 
 @app.route('/static/<path:filename>')
 def serve_static(filename):
     """Serve static files (CSS, JS)"""
-    return send_from_directory('static', filename)
+    print(f"Requested static file: {filename}")
+    try:
+        return send_from_directory('src/static', filename)
+    except Exception as e:
+        print(f"Error serving static file {filename}: {e}")
+        return f"Error: {e}", 404
+
+# Alternative route for static files
+@app.route('/static/css/<filename>')
+def serve_css(filename):
+    """Serve CSS files"""
+    return send_from_directory('src/static/css', filename)
+
+@app.route('/static/js/<filename>')
+def serve_js(filename):
+    """Serve JS files"""
+    return send_from_directory('src/static/js', filename)
+
+@app.route('/static/css/pages/<filename>')
+def serve_css_pages(filename):
+    """Serve CSS page files"""
+    return send_from_directory('src/static/css/pages', filename)
+
+@app.route('/static/js/pages/<filename>')
+def serve_js_pages(filename):
+    """Serve JS page files"""
+    return send_from_directory('src/static/js/pages', filename)
+
+@app.route('/test-static')
+def test_static():
+    """Test static file serving"""
+    try:
+        return send_from_directory('src/static', 'css/base.css')
+    except Exception as e:
+        return f"Error: {e}", 404
 
 @app.route('/api/generate-story', methods=['POST'])
 def generate_story():
