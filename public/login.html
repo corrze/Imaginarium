@@ -176,18 +176,22 @@
                 const user = userCredential.user;
                 console.log('User logged in:', user);
                 
-                // Check membership level
+                // Check membership level (getDoc is already imported at the top)
                 const userDoc = await getDoc(doc(db, "users", user.uid));
                 
                 if (userDoc.exists()) {
                     const userData = userDoc.data();
+                    console.log("User data:", userData);
                     
                     // Redirect based on membership level
                     if (userData.membershipLevel === "Pro") {
                         console.log("Pro user detected, redirecting to implemented.html");
                         window.location.href = 'implemented.html';
+                    } else if (userData.membershipLevel === "Kids") {
+                        console.log("Kids membership detected, redirecting to pro.html");
+                        window.location.href = 'pro.html';
                     } else {
-                        console.log("Regular user, redirecting to index.html");
+                        console.log("Unknown membership level, redirecting to index.html");
                         window.location.href = 'index.html';
                     }
                 } else {
