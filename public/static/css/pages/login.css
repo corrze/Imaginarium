@@ -292,6 +292,27 @@
     box-shadow: 0 6px 20px rgba(149, 165, 166, 0.4);
 }
 
+/* Screen visibility */
+.screen {
+    display: none;
+}
+
+.screen.active {
+    display: block;
+}
+
+/* Radio buttons styling */
+.radio-group {
+    margin-top: 5px;
+}
+
+.radio-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: normal;
+    cursor: pointer;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .login-container, .dashboard-container {
