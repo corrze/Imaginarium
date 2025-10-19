@@ -1,37 +1,24 @@
-// File: auth.js - Authentication handling
-import { initializeApp } from 'firebase/app';
+// auth.js
 import { 
-  getAuth, 
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   onAuthStateChanged,
   signOut
-} from 'firebase/auth';
-import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore';
+} from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+import { app, auth } from './firebase-config.js';
 
-// Your Firebase configuration (replace with your actual config)
-const firebaseConfig = {
-  apiKey: process.env.FIREBASE_API_KEY,
-  authDomain: "imaginarium-cb20a.firebaseapp.com",
-  projectId: "imaginarium-cb20a",
-  storageBucket: "imaginarium-cb20a.appspot.com",
-  messagingSenderId: "823978245551",
-  appId: "1:823978245551:web:abc123def456"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+// Initialize Firestore using the app from config
 const db = getFirestore(app);
 
-// User registration with age verification for COPPA compliance
+// User registration
 export const registerUser = async (email, password, isChild, parentEmail = null) => {
   try {
     // Create user account
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
     
-    // Store additional user information
+    // Store additional user information in Firestore
     await setDoc(doc(db, "users", user.uid), {
       email,
       isChild,
@@ -55,6 +42,15 @@ export const loginUser = async (email, password) => {
   } catch (error) {
     return { success: false, error: error.message };
   }
+};
+
+// Check if user is logged in
+export const checkAuthStatus = () => {
+  return new Promise((resolve) => {
+    onAuthStateChanged(auth, (user) => {
+      resolve(user);
+    });
+  });
 };
 
 // Membership validation
@@ -120,3 +116,5 @@ export const logoutUser = async () => {
     return { success: false, error: error.message };
   }
 };
+
+export { auth, db }; // Export for use in other files
