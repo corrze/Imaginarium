@@ -35,11 +35,11 @@ async function handleUpgrade() {
         });
         
         // Show success message
-        showSuccess('Successfully upgraded to Pro! Redirecting to Pro dashboard...');
+        showSuccess('Successfully upgraded to Pro! Redirecting...');
         
-        // Redirect to Pro dashboard
+        // Redirect to implemented.html
         setTimeout(() => {
-            window.location.href = '/pro-dashboard.html';
+            window.location.href = 'implemented.html';
         }, 2000);
         
     } catch (error) {
@@ -54,7 +54,6 @@ async function handleUpgrade() {
     }
 }
 
-// Rest of your code remains the same
 function showError(message) {
     // Create error notification
     const errorDiv = document.createElement('div');
