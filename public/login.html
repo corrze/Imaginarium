@@ -33,11 +33,11 @@
                 <div class="login-form-container">
                     <form id="login-form" class="login-form">
                         <div class="form-group">
-                            <label for="username" class="form-label">Email</label>
+                            <label for="login-email" class="form-label">Email</label>
                             <input 
-                                type="text" 
-                                id="username" 
-                                name="username" 
+                                type="email" 
+                                id="login-email" 
+                                name="email" 
                                 class="form-input"
                                 placeholder="Enter your email"
                                 required
@@ -45,10 +45,10 @@
                         </div>
                         
                         <div class="form-group">
-                            <label for="password" class="form-label">Password</label>
+                            <label for="login-password" class="form-label">Password</label>
                             <input 
                                 type="password" 
-                                id="password" 
+                                id="login-password" 
                                 name="password" 
                                 class="form-input"
                                 placeholder="Enter your password"
@@ -82,28 +82,202 @@
                 </div>
             </div>
         </div>
+
+        <!-- Signup Screen (initially hidden) -->
+        <div id="signup-screen" class="screen">
+            <div class="login-container">
+                <!-- Header -->
+                <div class="login-header">
+                    <h1 class="login-title">CREATE ACCOUNT</h1>
+                    <p class="login-subtitle">Join Imaginarium Pro</p>
+                </div>
+
+                <!-- Signup Form -->
+                <div class="login-form-container">
+                    <form id="signup-form" class="login-form">
+                        <div class="form-group">
+                            <label for="signup-email" class="form-label">Email</label>
+                            <input 
+                                type="email" 
+                                id="signup-email" 
+                                name="email" 
+                                class="form-input"
+                                placeholder="Enter your email"
+                                required
+                            >
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="signup-password" class="form-label">Password</label>
+                            <input 
+                                type="password" 
+                                id="signup-password" 
+                                name="password" 
+                                class="form-input"
+                                placeholder="Enter your password"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Account Type</label>
+                            <div class="radio-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="account-type" value="adult" checked> Adult Account
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="account-type" value="child"> Child Account
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div id="parent-email-container" class="form-group" style="display: none;">
+                            <label for="parent-email" class="form-label">Parent's Email</label>
+                            <input 
+                                type="email" 
+                                id="parent-email" 
+                                name="parentEmail" 
+                                class="form-input"
+                                placeholder="Enter parent's email"
+                            >
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" class="login-submit-btn">
+                                <span class="button-text">CREATE ACCOUNT</span>
+                            </button>
+                        </div>
+                        
+                        <div class="form-actions back-to-login-actions">
+                            <button type="button" id="back-to-login-btn" class="back-button">
+                                <span class="button-text">Back to Login</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- JavaScript for login functionality -->
-    <script>
-    document.getElementById('login-form').addEventListener('submit', function(e) {
-    e.preventDefault(); // stop form refresh
-    const username = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value.trim();
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import the functions you need from the SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-    if (!username || !password) {
-        alert('Please enter both email and password');
-        return;
-    }
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyA3QP1hhLju2ySnijIi-5_bItxl_C-7fxY",
+            authDomain: "imaginarium-cb20a.firebaseapp.com",
+            projectId: "imaginarium-cb20a",
+            storageBucket: "imaginarium-cb20a.appspot.com",
+            messagingSenderId: "823978245551",
+            appId: "1:823978245551:web:cd7f655e3b4bec2565035a"
+        };
 
-    // ✅ Navigate to Pro page after login
-    window.location.href = 'pro.html';
-    });
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-    // Back button
-    document.getElementById('back-to-about').addEventListener('click', () => {
-    window.location.href = 'index.html';
-    });
+        // Login functionality
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value.trim();
+
+            if (!email || !password) {
+                alert('Please enter both email and password');
+                return;
+            }
+
+            try {
+                // Sign in with Firebase
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                console.log('User logged in:', userCredential.user);
+                
+                // Redirect to Pro page
+                window.location.href = 'pro.html';
+            } catch (error) {
+                console.error('Login error:', error);
+                alert('Login failed: ' + error.message);
+            }
+        });
+
+        // Signup functionality
+        document.getElementById('signup-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('signup-email').value.trim();
+            const password = document.getElementById('signup-password').value.trim();
+            const isChild = document.querySelector('input[name="account-type"]:checked').value === 'child';
+            const parentEmail = isChild ? document.getElementById('parent-email').value.trim() : null;
+
+            if (!email || !password) {
+                alert('Please enter both email and password');
+                return;
+            }
+
+            if (isChild && !parentEmail) {
+                alert('Please enter parent email for child accounts');
+                return;
+            }
+
+            try {
+                // Create user with Firebase
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                
+                // Store additional user information in Firestore
+                await setDoc(doc(db, "users", user.uid), {
+                    email,
+                    isChild,
+                    parentEmail: isChild ? parentEmail : null,
+                    membershipLevel: "Kids", // Default to free tier
+                    membershipExpiry: null,
+                    createdAt: new Date().toISOString()
+                });
+                
+                console.log('User registered:', user);
+                alert('Account created successfully!');
+                
+                // Switch back to login screen
+                showLoginScreen();
+            } catch (error) {
+                console.error('Signup error:', error);
+                alert('Registration failed: ' + error.message);
+            }
+        });
+
+        // Toggle between login and signup screens
+        document.getElementById('create-account-btn').addEventListener('click', showSignupScreen);
+        document.getElementById('back-to-login-btn').addEventListener('click', showLoginScreen);
+
+        // Show/hide parent email based on account type
+        const accountTypeRadios = document.querySelectorAll('input[name="account-type"]');
+        accountTypeRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                const parentEmailContainer = document.getElementById('parent-email-container');
+                parentEmailContainer.style.display = this.value === 'child' ? 'block' : 'none';
+            });
+        });
+
+        // Back to about button
+        document.getElementById('back-to-about').addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
+
+        function showLoginScreen() {
+            document.getElementById('signup-screen').classList.remove('active');
+            document.getElementById('login-screen').classList.add('active');
+        }
+
+        function showSignupScreen() {
+            document.getElementById('login-screen').classList.remove('active');
+            document.getElementById('signup-screen').classList.add('active');
+        }
     </script>
 </body>
 </html>
