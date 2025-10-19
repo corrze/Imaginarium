@@ -7,7 +7,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    
+    <!-- Modular CSS Structure -->
+    <link rel="stylesheet" href="static/css/base.css">
+    <link rel="stylesheet" href="static/css/layout.css">
+    <link rel="stylesheet" href="static/css/pages/intro.css">
+    <link rel="stylesheet" href="static/css/pages/story.css">
+    <link rel="stylesheet" href="static/css/pages/conclusion.css">
 </head>
 <body>
     <!-- Background Element - Easy to replace with your own image -->
@@ -17,24 +23,25 @@
     </div>
     
     <div class="app-container">
-        <!-- Landing Screen -->
+        <!-- Introduction Screen -->
         <div id="landing-screen" class="screen active">
-            <div class="landing-content">
+            <div class="content-container">
                 <div class="title-section">
-                    <h1 class="app-title">Imaginarium</h1>
-                    <p class="tagline">Where your imagination comes to life!</p>
+                    <h1 class="app-title intro-title">Imaginarium</h1>
+                    <p class="tagline intro-tagline">Where your imagination comes to life!</p>
                 </div>
                 
-                <div class="input-section">
-                    <div class="input-container">
+                <div class="input-section intro-content">
+                    <div class="input-container intro-input-container">
                         <label for="story-input" class="input-label">What's your story idea?</label>
                         <textarea 
                             id="story-input" 
+                            class="input-field"
                             placeholder="Tell me about a brave knight, a magical forest, or anything you dream up..."
                             rows="3"
                         ></textarea>
                     </div>
-                    <button id="create-story-btn" class="primary-button">
+                    <button id="create-story-btn" class="primary-button intro-create-button">
                         <span class="button-text">Create My Story</span>
                     </button>
                 </div>
@@ -46,10 +53,10 @@
             <div class="story-container">
                 <!-- Navigation Header -->
                 <div class="story-header">
-                    <button id="restart-btn" class="secondary-button">
+                    <button id="restart-btn" class="secondary-button story-nav-restart">
                         <span class="button-text">Restart Story</span>
                     </button>
-                    <div class="story-progress">
+                    <div class="story-progress story-nav-progress">
                         <span id="page-counter">Page 1 of 1</span>
                     </div>
                 </div>
@@ -62,13 +69,41 @@
                 <!-- Navigation Footer -->
                 <div class="story-footer">
                     <button id="back-btn" class="nav-button" disabled>
-                        <span class="button-icon">←</span>
                         <span class="button-text">Back</span>
                     </button>
                     <button id="next-btn" class="nav-button" disabled>
                         <span class="button-text">Next</span>
-                        <span class="button-icon">→</span>
                     </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conclusion Screen -->
+        <div id="conclusion-screen" class="screen">
+            <div class="conclusion-container">
+                <div class="conclusion-content">
+                    <div class="conclusion-celebration">Congratulations!</div>
+                    <h1 id="conclusion-title" class="conclusion-title">Your Adventure is Complete!</h1>
+                    
+                    <div id="conclusion-message" class="conclusion-message">
+                        <!-- Dynamic content will be inserted here -->
+                    </div>
+                    
+                    <div id="conclusion-stats" class="conclusion-stats">
+                        <!-- Dynamic stats will be inserted here -->
+                    </div>
+                    
+                    <div id="conclusion-actions" class="conclusion-actions">
+                        <button id="new-story-btn" class="primary-button">
+                            <span class="button-text">Create New Story</span>
+                        </button>
+                        <button id="share-story-btn" class="secondary-button">
+                            <span class="button-text">Share Story</span>
+                        </button>
+                        <button id="view-story-btn" class="nav-button">
+                            <span class="button-text">View Story</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -82,6 +117,7 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Modular JavaScript Structure -->
+    <script type="module" src="static/js/main.js"></script>
 </body>
 </html>
