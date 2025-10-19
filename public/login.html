@@ -82,34 +82,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Pro Dashboard (hidden initially) -->
-        <div id="pro-dashboard" class="screen">
-            <div class="dashboard-container">
-                <div class="dashboard-header">
-                    <h1 class="dashboard-title">VISATRACK</h1>
-                    <div class="dashboard-stats">
-                        <span class="stats-text">10/10 Generated</span>
-                    </div>
-                </div>
-                
-                <div class="dashboard-content">
-                    <div class="welcome-message">
-                        <h2>Welcome to Imaginarium Pro!</h2>
-                        <p>You now have access to all premium features and advanced story generation tools.</p>
-                    </div>
-                    
-                    <div class="dashboard-actions">
-                        <button id="start-pro-generator" class="primary-button">
-                            <span class="button-text">Start Pro Generator</span>
-                        </button>
-                        <button id="logout-btn" class="secondary-button">
-                            <span class="button-text">Logout</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- JavaScript for login functionality -->
@@ -143,8 +115,7 @@
 
         // Logout functionality
         document.getElementById('logout-btn').addEventListener('click', function() {
-            document.getElementById('pro-dashboard').classList.remove('active');
-            document.getElementById('login-screen').classList.add('active');
+            window.location.href = 'pro.html';
             
             // Clear form
             document.getElementById('login-form').reset();
@@ -156,6 +127,8 @@
             // In a real app, this would redirect to a registration page or show a registration form
             alert('Create Account feature coming soon! For now, you can use any username and password to login.');
         });
+
+
     </script>
 </body>
 </html>
