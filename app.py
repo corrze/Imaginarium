@@ -46,6 +46,11 @@ if client:
         client = None
         image_client = None
 
+@app.route('/<path:filename>')
+def serve_html(filename):
+    if filename.endswith('.html'):
+        return send_from_directory('public', filename)
+    return "Not found", 404
 @app.route('/')
 def serve_index():
     """Serve the main HTML file"""
@@ -250,6 +255,55 @@ def generate_image():
     except Exception as e:
         print(f"Error generating image: {str(e)}")
         return jsonify({'error': 'Failed to generate image'}), 500
+    
+def generate_with_gemini_imagen(prompt, page_number):
+    """Generate image using Gemini's Imagen API"""
+    try:
+        if not image_client:
+            raise Exception("Image client not initialized")
+        
+        print(f"Generating image with Imagen for page {page_number}...")
+        
+        response = image_client.models.generate_images(
+            model='imagen-4.0-generate-001',
+            prompt=prompt,
+            config=types.GenerateImagesConfig(
+                number_of_images=1,
+                safety_filter_level='block_low_and_above',
+                person_generation='allow_adult',
+                aspect_ratio='16:9',
+            )
+        )
+        
+        if response.generated_images and len(response.generated_images) > 0:
+            generated_image = response.generated_images[0]
+            
+            if hasattr(generated_image, 'blocked_reason') and generated_image.blocked_reason:
+                print(f"⚠️ Image blocked: {generated_image.blocked_reason}")
+                return None
+            
+            filename = f"story_page_{page_number}_{hash(prompt) % 100000}.png"
+            filepath = os.path.join('public', 'static', 'images', filename)
+            os.makedirs(os.path.dirname(filepath), exist_ok=True)
+            
+            if hasattr(generated_image.image, 'save'):
+                generated_image.image.save(filepath)
+            else:
+                if hasattr(generated_image, 'image_bytes'):
+                    with open(filepath, 'wb') as f:
+                        f.write(generated_image.image_bytes)
+            
+            print(f"✅ Image saved to {filepath}")
+            return f"/static/images/{filename}"
+        
+        print("⚠️ No images generated")
+        return None
+        
+    except Exception as e:
+        print(f"Gemini Imagen error: {e}")
+        import traceback
+        traceback.print_exc()
+        return None
 
 # --- Stripe Payment Routes ---
 
