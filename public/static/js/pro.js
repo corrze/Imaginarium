@@ -20,17 +20,18 @@ async function handleUpgrade() {
   button.disabled = true;
 
   try {
+    // Require a signed-in Firebase user
     const user = auth.currentUser;
     if (!user) throw new Error('Please log in to upgrade to Pro');
 
-    // Use an absolute, same-origin URL to avoid any <base> tag surprises
+    // Call your Flask route on the SAME ORIGIN (Railway all-in-one)
     const res = await fetch(`${location.origin}/create-checkout-session`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        priceId: 'price_pro_monthly',
-        successUrl: `${location.origin}/success`,
-        cancelUrl:  `${location.origin}/pro.html`
+        priceId: 'price_pro_monthly',              // your Stripe price
+        successUrl: `${location.origin}/success`,  // after payment
+        cancelUrl:  `${location.origin}/pro.html`  // if user cancels
       })
     });
 
@@ -39,10 +40,12 @@ async function handleUpgrade() {
       throw new Error(data.error || `Checkout failed (HTTP ${res.status})`);
     }
 
+    // Redirect to Stripe (or mock success if no Stripe key)
     window.location.assign(data.url);
+
   } catch (err) {
-    console.error('[Upgrade] ', err);
-    showError(err.message || 'Upgrade failed. Please try again.');
+    console.error('[Upgrade] error', err);
+    alert(err.message || 'Upgrade failed. Please try again.');
     button.innerHTML = originalHTML;
     button.disabled = false;
   }

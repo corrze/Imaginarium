@@ -49,5 +49,19 @@
             </div>
         </div>
     </div>
+    <script type="module">
+    import { auth, db } from '/firebase-config.js';
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+    import { doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+    onAuthStateChanged(auth, async (user) => {
+    if (!user) return;
+    await updateDoc(doc(db, 'users', user.uid), {
+        membershipLevel: 'Pro',
+        membershipExpiry: new Date(Date.now() + 30*24*60*60*1000).toISOString(),
+        lastUpdated: new Date().toISOString()
+    });
+    });
+    </script>
 </body>
 </html>

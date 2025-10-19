@@ -7,7 +7,8 @@ import os
 import stripe
 from PIL import Image
 
-app = Flask(__name__, template_folder='public/templates')
+app = Flask(__name__)
+
 CORS(app, resources={
     r"/api/*": {
         "origins": "*",
@@ -313,11 +314,6 @@ def generate_with_gemini_imagen(prompt, page_number):
 
 # --- Stripe Payment Routes ---
 
-@app.route('/pro')
-def pro_paywall():
-    """Serve the Pro paywall page"""
-    return render_template('pro.html')
-
 @app.route('/create-checkout-session', methods=['POST'])
 def create_checkout_session():
     try:
@@ -348,18 +344,18 @@ def create_checkout_session():
         return jsonify({'url': f"{request.url_root}success?mock=true", 'mock': True, 'error': str(e)}), 200
 
 
+@app.route('/pro')
+def pro_paywall():
+    return send_from_directory('public', 'pro.html')
+
 @app.route('/success')
 def payment_success():
-    """Handle successful payment"""
-    mock = request.args.get('mock', False)
-    if mock:
-        print("Mock payment successful - redirecting to success page")
-    return render_template('implemented.html')
+    # After Stripe redirects back, show your success page
+    return send_from_directory('public', 'implemented.html')
 
 @app.route('/cancel')
 def payment_cancel():
-    """Handle cancelled payment"""
-    return render_template('pro.html')
+    return send_from_directory('public', 'pro.html')
 
 if __name__ == '__main__':
     os.makedirs('public/static/images', exist_ok=True)
