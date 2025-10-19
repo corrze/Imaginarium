@@ -3,7 +3,7 @@
 export const MAX_PAGES = 5;
 
 // Railway API URL
-const API_BASE = 'https://web-production-2c9fa.up.railway.app';
+const API_BASE = '';
 
 export class StoryManager {
     constructor() {
