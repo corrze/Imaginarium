@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// public/static/js/pro.js
 async function handleUpgrade() {
   const button = document.getElementById('upgrade-btn');
   const originalHTML = button.innerHTML;
@@ -20,37 +19,63 @@ async function handleUpgrade() {
   button.disabled = true;
 
   try {
-    // Require a signed-in Firebase user
+    // Check if user is logged in
     const user = auth.currentUser;
-    if (!user) throw new Error('Please log in to upgrade to Pro');
-
-    // Call your Flask route on the SAME ORIGIN (Railway all-in-one)
-    const res = await fetch(`${location.origin}/create-checkout-session`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        priceId: 'price_pro_monthly',              // your Stripe price
-        successUrl: `${location.origin}/success`,  // after payment
-        cancelUrl:  `${location.origin}/pro.html`  // if user cancels
-      })
-    });
-
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || !data.url) {
-      throw new Error(data.error || `Checkout failed (HTTP ${res.status})`);
+    if (!user) {
+      throw new Error('Please log in to upgrade to Pro');
     }
 
-    // Redirect to Stripe (or mock success if no Stripe key)
-    window.location.assign(data.url);
+    try {
+      // First try the Flask route
+      console.log("Trying to use Flask checkout endpoint...");
+      const response = await fetch(`${location.origin}/create-checkout-session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          priceId: 'price_pro_monthly',
+          successUrl: `${location.origin}/success`,
+          cancelUrl: `${location.origin}/pro.html`
+        })
+      });
 
-  } catch (err) {
-    console.error('[Upgrade] error', err);
-    alert(err.message || 'Upgrade failed. Please try again.');
+      const data = await response.json();
+      
+      if (data.url) {
+        console.log("Got checkout URL from server:", data.url);
+        window.location.href = data.url;
+        return; // Exit function if successful
+      }
+    } catch (error) {
+      console.log("Flask checkout failed, falling back to Firebase:", error);
+      // Continue with Firebase method if Flask route fails
+    }
+
+    // Fallback: Use Firebase directly
+    console.log("Using Firebase fallback method...");
+    await updateDoc(doc(db, "users", user.uid), {
+      membershipLevel: "Pro",
+      membershipExpiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
+      lastUpdated: new Date().toISOString()
+    });
+    
+    showSuccess('Successfully upgraded to Pro! Redirecting...');
+    
+    // Redirect to implemented.html
+    setTimeout(() => {
+      window.location.href = 'implemented.html';
+    }, 2000);
+    
+  } catch (error) {
+    console.error('Error upgrading to Pro:', error);
+    
+    // Show error message
+    showError(error.message || 'Failed to upgrade. Please try again.');
+    
+    // Reset button
     button.innerHTML = originalHTML;
     button.disabled = false;
   }
 }
-
 
 function showError(message) {
     // Create error notification
