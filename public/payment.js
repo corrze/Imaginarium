@@ -1,9 +1,6 @@
 // File: payment.js - Handle payments using Visa APIs
-import { getFirestore, doc, updateDoc, getDoc } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
-
-const db = getFirestore();
-const auth = getAuth();
+import { doc, updateDoc, getDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+import { auth, db } from './auth.js';
 
 // For hackathon purposes, this could be mocked or integrated with Visa Sandbox
 // Reference: https://developer.visa.com/pages/working-with-visa-apis/visa-developer-quick-start-guide
