@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imaginarium</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Modular CSS Structure -->
+    <link rel="stylesheet" href="static/css/base.css">
+    <link rel="stylesheet" href="static/css/layout.css">
+    <link rel="stylesheet" href="static/css/pages/about.css">
+</head>
+<body>
+    <!-- Background Element -->
+    <div class="background-element">
+        <!-- Background styling handled in CSS -->
+    </div>
+    
+    <div class="app-container">
+        <!-- About Us Page -->
+        <div id="about-screen" class="screen active">
+            <div class="about-container">
+                <!-- Header -->
+                <div class="about-header">
+                    <h1 class="about-title">Welcome to Imaginarium</h1>
+                    <p class="about-subtitle">Bring childhood wonder to life!</p>
+                </div>
+
+                <!-- Welcome Section -->
+                <div class="welcome-section">
+                    <div class="welcome-content">
+                        <h2 class="welcome-heading">Explore Childhood Wonder</h2>
+                        <p class="welcome-description">
+                            Imaginarium is a platform designed to spark that familiar sense of childhood wonder into your very own
+                            personalized visual story! Pick your own adventure, and realize your dreams in this 
+                            AI-powered platform!
+                        </p>
+                        <p class="welcome-description">
+                            Through interactive storytelling, AI-powered creativity tools, and a safe, engaging environment, 
+                            we help you transform your wildest ideas into captivating stories and adventures. 
+                            Whether it's a brave knight's quest, a magical forest adventure, or a journey to distant planets, 
+                            every story starts with YOU!
+                        </p>
+                        <p>
+                            Submission in <a href = "https://dh25.dubhacks.co/" target = "blank"> Dubhacks 2025.</a>
+                        </p>
+                        <div class="welcome-features">
+                            <div class="feature-item">
+                                <h3>Spark Creativity</h3>
+                                <p>Ignite imagination with AI-powered story generation</p>
+                            </div>
+                            <div class="feature-item">
+                                <h3>Safe & Fun</h3>
+                                <p>Child-friendly interface designed for wonder and discovery</p>
+                            </div>
+                            <div class="feature-item">
+                                <h3>Endless Stories</h3>
+                                <p>Every idea becomes a unique, personalized adventure</p>
+                            </div>
+                            <div class="feature-item">
+                                <h3>Build What Excites You</h3>
+                                <p>Create stories that reflect your passions and interests</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Version Selection Panels -->
+                <div class="version-panels">
+                    <!-- Kid Version Panel -->
+                    <div class="version-panel kid-panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">Kid</h2>
+                        </div>
+                        <div class="panel-content">
+                            <div class="placeholder-content">
+                                <div class="wavy-line"></div>
+                                <div class="wavy-line"></div>
+                                <div class="wavy-line"></div>
+                            </div>
+                            <p class="panel-description">Perfect for young storytellers! Create amazing adventures with our kid-friendly interface.</p>
+                        </div>
+                        <div class="panel-footer">
+                            <button id="kid-go-btn" class="go-button">
+                                <span class="button-text">GO</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Pro Version Panel -->
+                    <div class="version-panel pro-panel">
+                        <div class="panel-header">
+                            <h2 class="panel-title">Pro</h2>
+                        </div>
+                        <div class="panel-content">
+                            <div class="placeholder-content">
+                                <div class="wavy-line"></div>
+                                <div class="wavy-line"></div>
+                                <div class="wavy-line"></div>
+                            </div>
+                            <p class="panel-description">Advanced features for educators, parents, and content creators. Full access to premium tools.</p>
+                        </div>
+                        <div class="panel-footer">
+                            <button id="pro-login-btn" class="login-button">
+                                <span class="button-text">LOGIN</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript for navigation -->
+    <script>
+        // Kid version - redirect to main generator
+        document.getElementById('kid-go-btn').addEventListener('click', function() {
+            window.location.href = 'index.html';
+        });
+
+        // Pro version - redirect to login page
+        document.getElementById('pro-login-btn').addEventListener('click', function() {
+            window.location.href = 'login.html';
+        });
+    </script>
+</body>
+</html>

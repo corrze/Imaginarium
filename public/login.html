@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Imaginarium Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Modular CSS Structure -->
+    <link rel="stylesheet" href="static/css/base.css">
+    <link rel="stylesheet" href="static/css/layout.css">
+    <link rel="stylesheet" href="static/css/pages/login.css">
+</head>
+<body>
+    <!-- Background Element -->
+    <div class="background-element">
+        <!-- Background styling handled in CSS -->
+    </div>
+    
+    <div class="app-container">
+        <!-- Login Page -->
+        <div id="login-screen" class="screen active">
+            <div class="login-container">
+                <!-- Header -->
+                <div class="login-header">
+                    <h1 class="login-title">LOGIN</h1>
+                    <p class="login-subtitle">Access your Imaginarium Pro account</p>
+                </div>
+
+                <!-- Login Form -->
+                <div class="login-form-container">
+                    <form id="login-form" class="login-form">
+                        <div class="form-group">
+                            <label for="username" class="form-label">USER</label>
+                            <input 
+                                type="text" 
+                                id="username" 
+                                name="username" 
+                                class="form-input"
+                                placeholder="Enter your username"
+                                required
+                            >
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password" class="form-label">PASS</label>
+                            <input 
+                                type="password" 
+                                id="password" 
+                                name="password" 
+                                class="form-input"
+                                placeholder="Enter your password"
+                                required
+                            >
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="submit" class="login-submit-btn">
+                                <span class="button-text">LOGIN</span>
+                            </button>
+                        </div>
+                        
+                        <div class="form-divider">
+                            <span class="divider-text">or</span>
+                        </div>
+                        
+                        <div class="form-actions create-account-actions">
+                            <button type="button" id="create-account-btn" class="create-account-btn">
+                                <span class="button-text">Create Account</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Back to About -->
+                <div class="login-footer">
+                    <button id="back-to-about" class="back-button">
+                        <span class="button-text">← Back to About</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pro Dashboard (hidden initially) -->
+        <div id="pro-dashboard" class="screen">
+            <div class="dashboard-container">
+                <div class="dashboard-header">
+                    <h1 class="dashboard-title">VISATRACK</h1>
+                    <div class="dashboard-stats">
+                        <span class="stats-text">10/10 Generated</span>
+                    </div>
+                </div>
+                
+                <div class="dashboard-content">
+                    <div class="welcome-message">
+                        <h2>Welcome to Imaginarium Pro!</h2>
+                        <p>You now have access to all premium features and advanced story generation tools.</p>
+                    </div>
+                    
+                    <div class="dashboard-actions">
+                        <button id="start-pro-generator" class="primary-button">
+                            <span class="button-text">Start Pro Generator</span>
+                        </button>
+                        <button id="logout-btn" class="secondary-button">
+                            <span class="button-text">Logout</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript for login functionality -->
+    <script>
+        // Simple login validation (replace with real authentication)
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // Simple demo validation - replace with real authentication
+            if (username && password) {
+                // Hide login screen and show dashboard
+                document.getElementById('login-screen').classList.remove('active');
+                document.getElementById('pro-dashboard').classList.add('active');
+            } else {
+                alert('Please enter both username and password');
+            }
+        });
+
+        // Back to About page
+        document.getElementById('back-to-about').addEventListener('click', function() {
+            window.location.href = 'about.html';
+        });
+
+        // Start Pro Generator (redirect to main page with pro features)
+        document.getElementById('start-pro-generator').addEventListener('click', function() {
+            window.location.href = 'index.html?pro=true';
+        });
+
+        // Logout functionality
+        document.getElementById('logout-btn').addEventListener('click', function() {
+            document.getElementById('pro-dashboard').classList.remove('active');
+            document.getElementById('login-screen').classList.add('active');
+            
+            // Clear form
+            document.getElementById('login-form').reset();
+        });
+
+        // Create Account functionality
+        document.getElementById('create-account-btn').addEventListener('click', function() {
+            // For demo purposes, we'll just show an alert
+            // In a real app, this would redirect to a registration page or show a registration form
+            alert('Create Account feature coming soon! For now, you can use any username and password to login.');
+        });
+    </script>
+</body>
+</html>
