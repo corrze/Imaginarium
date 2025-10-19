@@ -1,11 +1,16 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, render_template
 from flask_cors import CORS
 import google.generativeai as genai
 import json
 import os
+import stripe
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='public/templates')
 CORS(app)  # Enable CORS for frontend communication
+
+# Configure Stripe (test mode)
+stripe.api_key = os.getenv('STRIPE_SECRET_KEY', 'sk_test_51234567890abcdefghijklmnopqrstuvwxyz')
+STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY', 'pk_test_51234567890abcdefghijklmnopqrstuvwxyz')
 
 # --- Load .env if present ---
 try:
@@ -35,14 +40,14 @@ if client:
 @app.route('/')
 def serve_index():
     """Serve the main HTML file"""
-    return send_from_directory('src', 'index.html')
+    return send_from_directory('public', 'index.html')
 
 @app.route('/static/<path:filename>')
 def serve_static(filename):
     """Serve static files (CSS, JS)"""
     print(f"Requested static file: {filename}")
     try:
-        return send_from_directory('src/static', filename)
+        return send_from_directory('public/static', filename)
     except Exception as e:
         print(f"Error serving static file {filename}: {e}")
         return f"Error: {e}", 404
@@ -51,28 +56,28 @@ def serve_static(filename):
 @app.route('/static/css/<filename>')
 def serve_css(filename):
     """Serve CSS files"""
-    return send_from_directory('src/static/css', filename)
+    return send_from_directory('public/static/css', filename)
 
 @app.route('/static/js/<filename>')
 def serve_js(filename):
     """Serve JS files"""
-    return send_from_directory('src/static/js', filename)
+    return send_from_directory('public/static/js', filename)
 
 @app.route('/static/css/pages/<filename>')
 def serve_css_pages(filename):
     """Serve CSS page files"""
-    return send_from_directory('src/static/css/pages', filename)
+    return send_from_directory('public/static/css/pages', filename)
 
 @app.route('/static/js/pages/<filename>')
 def serve_js_pages(filename):
     """Serve JS page files"""
-    return send_from_directory('src/static/js/pages', filename)
+    return send_from_directory('public/static/js/pages', filename)
 
 @app.route('/test-static')
 def test_static():
     """Test static file serving"""
     try:
-        return send_from_directory('src/static', 'css/base.css')
+        return send_from_directory('public/static', 'css/base.css')
     except Exception as e:
         return f"Error: {e}", 404
 
@@ -151,6 +156,70 @@ def generate_image():
     except Exception as e:
         print(f"Error generating image: {str(e)}")
         return jsonify({'error': 'Failed to generate image'}), 500
+
+# --- Stripe Payment Routes ---
+
+@app.route('/pro')
+def pro_paywall():
+    """Serve the Pro paywall page"""
+    return render_template('pro.html')
+
+@app.route('/create-checkout-session', methods=['POST'])
+def create_checkout_session():
+    """Create a Stripe checkout session"""
+    try:
+        data = request.get_json()
+        price_id = data.get('priceId', 'price_pro_monthly')
+        success_url = data.get('successUrl', f"{request.url_root}success")
+        cancel_url = data.get('cancelUrl', f"{request.url_root}pro")
+        
+        # Check if Stripe is properly configured
+        if not stripe.api_key or stripe.api_key.startswith('sk_test_placeholder'):
+            # Mock checkout session for demo purposes
+            print("Using mock checkout session (Stripe not configured)")
+            return jsonify({
+                'url': success_url + '?mock=true',
+                'mock': True
+            })
+        
+        # Create Stripe checkout session
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price': price_id,
+                'quantity': 1,
+            }],
+            mode='subscription',
+            success_url=success_url,
+            cancel_url=cancel_url,
+            metadata={
+                'product': 'storyboard_pro',
+                'feature': 'monthly_subscription'
+            }
+        )
+        
+        return jsonify({'url': checkout_session.url})
+        
+    except Exception as e:
+        print(f"Error creating checkout session: {str(e)}")
+        # Fallback to mock success for demo
+        return jsonify({
+            'url': f"{request.url_root}success?mock=true",
+            'mock': True
+        })
+
+@app.route('/success')
+def payment_success():
+    """Handle successful payment"""
+    mock = request.args.get('mock', False)
+    if mock:
+        print("Mock payment successful - redirecting to success page")
+    return render_template('implemented.html')
+
+@app.route('/cancel')
+def payment_cancel():
+    """Handle cancelled payment"""
+    return render_template('pro.html')
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
