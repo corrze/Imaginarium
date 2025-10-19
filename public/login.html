@@ -141,7 +141,7 @@
         // Import the functions you need from the SDKs
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
         // Firebase configuration
         const firebaseConfig = {
@@ -173,10 +173,27 @@
             try {
                 // Sign in with Firebase
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                console.log('User logged in:', userCredential.user);
+                const user = userCredential.user;
+                console.log('User logged in:', user);
                 
-                // Redirect to Pro page
-                window.location.href = 'pro.html';
+                // Check membership level
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    
+                    // Redirect based on membership level
+                    if (userData.membershipLevel === "Pro") {
+                        console.log("Pro user detected, redirecting to implemented.html");
+                        window.location.href = 'implemented.html';
+                    } else {
+                        console.log("Regular user, redirecting to index.html");
+                        window.location.href = 'index.html';
+                    }
+                } else {
+                    console.log("User document not found, redirecting to index.html");
+                    window.location.href = 'index.html';
+                }
             } catch (error) {
                 console.error('Login error:', error);
                 alert('Login failed: ' + error.message);
