@@ -1,127 +1,190 @@
-/* Login Page Styles */
+/* Login Page Styles - Dark Cinematic Theme (Matching Pro) */
 
-.login-container, .dashboard-container {
-    max-width: 500px;
-    margin: 0 auto;
-    padding: 2rem;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0f0f0f 100%);
+    color: #ffffff;
     min-height: 100vh;
     display: flex;
-    flex-direction: column;
+    align-items: center;
     justify-content: center;
+    padding: 20px;
+    line-height: 1.6;
 }
 
-.login-header, .dashboard-header {
-    text-align: center;
-    margin-bottom: 3rem;
-    background: rgba(255, 255, 255, 0.95);
+.app-container {
+    width: 100%;
+    max-width: 500px;
+}
+
+/* Screen switching */
+.screen {
+    display: none;
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+.screen.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Login Container */
+.login-container {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid #333;
     border-radius: 20px;
-    padding: 2rem;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: all 0.3s ease;
 }
 
-.login-title, .dashboard-title {
-    font-family: 'Fredoka One', cursive;
-    font-size: 3rem;
-    color: #2c3e50;
+.login-container:hover {
+    transform: translateY(-5px);
+    border-color: #555;
+}
+
+/* Header */
+.login-header {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+    border-bottom: 1px solid rgba(99, 102, 241, 0.3);
+    padding: 3rem 2rem;
+    text-align: center;
+}
+
+.login-title {
+    font-size: 2.5rem;
+    font-weight: 700;
     margin-bottom: 0.5rem;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    background: linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 1px;
 }
 
 .login-subtitle {
-    font-family: 'Poppins', sans-serif;
     font-size: 1.1rem;
-    color: #7f8c8d;
-    font-weight: 400;
+    color: #aaa;
+    font-weight: 300;
 }
 
-/* Login Form */
+/* Form Container */
 .login-form-container {
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 20px;
     padding: 2.5rem;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-    margin-bottom: 2rem;
 }
 
 .login-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+    width: 100%;
 }
 
+/* Form Groups */
 .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+    margin-bottom: 1.5rem;
 }
 
 .form-label {
-    font-family: 'Poppins', sans-serif;
-    font-size: 1rem;
+    display: block;
+    font-size: 0.9rem;
     font-weight: 600;
-    color: #2c3e50;
+    color: #ccc;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
-    letter-spacing: 1px;
 }
 
 .form-input {
-    font-family: 'Poppins', sans-serif;
-    font-size: 1rem;
-    padding: 1rem 1.5rem;
-    border: 2px solid #e0e0e0;
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 1px solid #333;
     border-radius: 10px;
-    background: #f8f9fa;
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
     transition: all 0.3s ease;
-    outline: none;
+    background: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
 }
 
 .form-input:focus {
-    border-color: #e74c3c;
-    background: white;
-    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+    outline: none;
+    border-color: #6366f1;
+    background: rgba(99, 102, 241, 0.1);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
 }
 
 .form-input::placeholder {
-    color: #bdc3c7;
-    font-style: italic;
+    color: #666;
 }
 
+/* Form Actions */
 .form-actions {
-    margin-top: 1rem;
-    text-align: center;
+    margin-top: 1.5rem;
+}
+
+/* Buttons */
+.login-submit-btn,
+.create-account-btn {
+    width: 100%;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 0.5px;
 }
 
 .login-submit-btn {
-    font-family: 'Poppins', sans-serif;
-    font-size: 1.2rem;
-    font-weight: 600;
-    padding: 1rem 2rem;
-    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
     color: white;
-    border: none;
-    border-radius: 50px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
-    min-width: 150px;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
 }
 
 .login-submit-btn:hover {
-    background: linear-gradient(135deg, #c0392b, #a93226);
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
 }
 
 .login-submit-btn:active {
     transform: translateY(0);
 }
 
+.create-account-btn {
+    background: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
+    border: 1px solid #333;
+}
+
+.create-account-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: #555;
+    transform: translateY(-2px);
+}
+
+.create-account-btn:active {
+    transform: translateY(0);
+}
+
 /* Form Divider */
 .form-divider {
+    margin: 2rem 0;
     text-align: center;
-    margin: 0.75rem 0;
     position: relative;
 }
 
@@ -132,227 +195,106 @@
     left: 0;
     right: 0;
     height: 1px;
-    background: #e0e0e0;
+    background: linear-gradient(90deg, transparent, #333, transparent);
 }
 
 .divider-text {
-    font-family: 'Poppins', sans-serif;
-    font-size: 0.9rem;
-    color: #7f8c8d;
-    background: rgba(255, 255, 255, 0.95);
-    padding: 0 1rem;
     position: relative;
-}
-
-/* Create Account Button */
-.create-account-btn {
-    font-family: 'Poppins', sans-serif;
-    font-size: 1.2rem;
-    font-weight: 600;
-    padding: 1rem 2rem;
-    background: linear-gradient(135deg, #3498db, #2980b9);
-    color: white;
-    border: none;
-    border-radius: 50px;
-    cursor: pointer;
-    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 0 1rem;
+    color: #666;
+    font-size: 0.85rem;
+    font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 1px;
-    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
-    min-width: 150px;
 }
 
-.create-account-btn:hover {
-    background: linear-gradient(135deg, #2980b9, #1f5f8b);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+/* Security Note */
+.security-note {
+    text-align: center;
+    margin-top: 2rem;
+    padding: 1rem;
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 10px;
+    color: #aaa;
+    font-size: 0.875rem;
 }
 
-.create-account-btn:active {
-    transform: translateY(0);
-}
-
-/* Create Account Actions */
-.create-account-actions {
-    margin-top: 0.75rem;
-}
-
-/* Login Footer */
+/* Footer */
 .login-footer {
+    padding: 1.5rem 2.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid #333;
     text-align: center;
 }
 
 .back-button {
-    font-family: 'Poppins', sans-serif;
-    font-size: 1rem;
-    color: #7f8c8d;
     background: none;
-    border: 2px solid #bdc3c7;
-    padding: 0.8rem 1.5rem;
-    border-radius: 25px;
+    border: none;
+    color: #888;
+    font-size: 0.9rem;
+    font-weight: 500;
     cursor: pointer;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
     transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
 }
 
 .back-button:hover {
-    color: #2c3e50;
-    border-color: #7f8c8d;
-    background: rgba(127, 140, 141, 0.1);
-}
-
-/* Dashboard Styles */
-.dashboard-header {
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 20px;
-    padding: 2rem;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    margin-bottom: 2rem;
-}
-
-.dashboard-stats {
-    margin-top: 1rem;
-}
-
-.stats-text {
-    font-family: 'Poppins', sans-serif;
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: #27ae60;
-    background: rgba(39, 174, 96, 0.1);
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    display: inline-block;
-}
-
-.dashboard-content {
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 20px;
-    padding: 2.5rem;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-    text-align: center;
-}
-
-.welcome-message h2 {
-    font-family: 'Poppins', sans-serif;
-    font-size: 2rem;
-    color: #2c3e50;
-    margin-bottom: 1rem;
-}
-
-.welcome-message p {
-    font-family: 'Poppins', sans-serif;
-    font-size: 1.1rem;
-    color: #7f8c8d;
-    line-height: 1.6;
-    margin-bottom: 2rem;
-}
-
-.dashboard-actions {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    flex-wrap: wrap;
-}
-
-.primary-button, .secondary-button {
-    font-family: 'Poppins', sans-serif;
-    font-size: 1rem;
-    font-weight: 600;
-    padding: 1rem 2rem;
-    border: none;
-    border-radius: 50px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    min-width: 150px;
-}
-
-.primary-button {
-    background: linear-gradient(135deg, #3498db, #2980b9);
-    color: white;
-    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
-}
-
-.primary-button:hover {
-    background: linear-gradient(135deg, #2980b9, #1f5f8b);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
-}
-
-.secondary-button {
-    background: linear-gradient(135deg, #95a5a6, #7f8c8d);
-    color: white;
-    box-shadow: 0 4px 15px rgba(149, 165, 166, 0.3);
-}
-
-.secondary-button:hover {
-    background: linear-gradient(135deg, #7f8c8d, #6c7b7d);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(149, 165, 166, 0.4);
-}
-
-/* Screen visibility */
-.screen {
-    display: none;
-}
-
-.screen.active {
-    display: block;
-}
-
-/* Radio buttons styling */
-.radio-group {
-    margin-top: 5px;
-}
-
-.radio-label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: normal;
-    cursor: pointer;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.05);
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
-    .login-container, .dashboard-container {
-        padding: 1rem;
+@media (max-width: 600px) {
+    body {
+        padding: 15px;
     }
-    
-    .login-title, .dashboard-title {
-        font-size: 2.5rem;
+
+    .login-header {
+        padding: 2.5rem 1.5rem;
     }
-    
-    .login-form-container, .dashboard-content {
-        padding: 2rem;
+
+    .login-title {
+        font-size: 2rem;
     }
-    
-    .dashboard-actions {
-        flex-direction: column;
-        align-items: center;
+
+    .login-subtitle {
+        font-size: 1rem;
     }
-    
-    .primary-button, .secondary-button {
-        width: 100%;
-        max-width: 250px;
+
+    .login-form-container {
+        padding: 2rem 1.5rem;
+    }
+
+    .login-footer {
+        padding: 1.25rem 1.5rem;
     }
 }
 
-@media (max-width: 480px) {
-    .login-title, .dashboard-title {
-        font-size: 2rem;
+@media (max-width: 400px) {
+    .login-header {
+        padding: 2rem 1rem;
     }
-    
-    .login-form-container, .dashboard-content {
-        padding: 1.5rem;
+
+    .login-title {
+        font-size: 1.75rem;
     }
-    
+
+    .login-form-container {
+        padding: 1.5rem 1rem;
+    }
+
     .form-input {
-        padding: 0.8rem 1rem;
+        padding: 0.75rem 0.875rem;
+        font-size: 0.95rem;
     }
-    
-    .login-submit-btn, .primary-button, .secondary-button {
-        padding: 0.8rem 1.5rem;
-        font-size: 0.9rem;
+
+    .login-submit-btn,
+    .create-account-btn {
+        padding: 0.875rem 1.5rem;
+        font-size: 0.95rem;
     }
 }

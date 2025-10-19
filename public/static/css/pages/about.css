@@ -1,4 +1,23 @@
 /* About Us Page Styles */
+body {
+    background-image: url('mainbackground.png'); /* since the image is in the same folder as this CSS */
+    background-size: cover;
+    background-position: top center;
+    background-repeat: no-repeat;
+    background-attachment: scroll; /* scrolls with page */
+}
+
+/* Optional overlay for readability */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.1); /* adjust opacity as needed */
+    z-index: -1;
+}
 
 .about-container {
     max-width: 1200px;
