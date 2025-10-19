@@ -118,6 +118,19 @@
     </div>
 
     <!-- Modular JavaScript Structure -->
+    <script type="module">
+        // Import Firebase configuration
+        import { app, auth } from './firebase-config.js';
+        import { getFirestore } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+    
+        // Initialize Firestore (since you don't export it from config)
+        const db = getFirestore(app);
+    
+        // Make Firebase services available globally
+        window.firebaseApp = app;
+        window.firebaseAuth = auth;
+        window.firebaseDb = db;
+    </script>
     <script type="module" src="static/js/main.js"></script>
 </body>
 </html>
