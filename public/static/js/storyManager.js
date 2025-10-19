@@ -2,6 +2,9 @@
 
 export const MAX_PAGES = 5;
 
+// Railway API URL
+const API_BASE = 'https://web-production-2c9fa.up.railway.app';
+
 export class StoryManager {
     constructor() {
         this.storyPages = [];
@@ -27,10 +30,10 @@ export class StoryManager {
         try {
             const pageNumber = this.storyPages.length + 1;
             
-            console.log('Calling /api/generate-story...');
+            console.log('Calling Railway API...');
             
-            // Generate story
-            const storyResponse = await fetch('/api/generate-story', {
+            // Generate story - using Railway URL
+            const storyResponse = await fetch(`${API_BASE}/api/generate-story`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -51,10 +54,10 @@ export class StoryManager {
             // Update history
             this.previousStory += ' ' + storyData.storyText;
             
-            console.log('Calling /api/generate-image...');
+            console.log('Calling Railway API for image...');
             
-            // Generate image
-            const imageResponse = await fetch('/api/generate-image', {
+            // Generate image - using Railway URL
+            const imageResponse = await fetch(`${API_BASE}/api/generate-image`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -69,7 +72,10 @@ export class StoryManager {
                 const imageData = await imageResponse.json();
                 console.log('Image generated:', imageData);
                 if (imageData.imageUrl) {
-                    imageUrl = imageData.imageUrl;
+                    // Prepend Railway URL if image URL is relative
+                    imageUrl = imageData.imageUrl.startsWith('http') 
+                        ? imageData.imageUrl 
+                        : `${API_BASE}${imageData.imageUrl}`;
                 }
             }
 
