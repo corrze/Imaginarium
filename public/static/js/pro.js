@@ -1,7 +1,7 @@
 // Pro Paywall JavaScript with Firebase Integration
 import { getAuth } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 import { getFirestore, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-import { app, auth, db } from './firebase-config.js';
+import { app, auth, db } from '../../firebase-config.js';
 
 document.addEventListener('DOMContentLoaded', function() {
     const upgradeBtn = document.getElementById('upgrade-btn');
