@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imaginarium - Create Your Adventure!</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One:wght@400&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Background Element - Easy to replace with your own image -->
+    <div class="background-element">
+        <!-- Replace this with your custom background image -->
+        <!-- Example: <img src="your-background-image.jpg" alt="Background" class="background-image"> -->
+    </div>
+    
+    <div class="app-container">
+        <!-- Landing Screen -->
+        <div id="landing-screen" class="screen active">
+            <div class="landing-content">
+                <div class="title-section">
+                    <h1 class="app-title">Imaginarium</h1>
+                    <p class="tagline">Where your imagination comes to life!</p>
+                </div>
+                
+                <div class="input-section">
+                    <div class="input-container">
+                        <label for="story-input" class="input-label">What's your story idea?</label>
+                        <textarea 
+                            id="story-input" 
+                            placeholder="Tell me about a brave knight, a magical forest, or anything you dream up..."
+                            rows="3"
+                        ></textarea>
+                    </div>
+                    <button id="create-story-btn" class="primary-button">
+                        <span class="button-text">Create My Story</span>
+                        <span class="button-icon">✨</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Story Screen -->
+        <div id="story-screen" class="screen">
+            <div class="story-container">
+                <!-- Navigation Header -->
+                <div class="story-header">
+                    <button id="restart-btn" class="secondary-button">
+                        <span class="button-icon">🔄</span>
+                        <span class="button-text">Restart Story</span>
+                    </button>
+                    <div class="story-progress">
+                        <span id="page-counter">Page 1 of 1</span>
+                    </div>
+                </div>
+
+                <!-- Story Pages Container -->
+                <div id="story-pages-container" class="story-pages-container">
+                    <!-- Pages will be dynamically generated here -->
+                </div>
+
+                <!-- Navigation Footer -->
+                <div class="story-footer">
+                    <button id="back-btn" class="nav-button" disabled>
+                        <span class="button-icon">←</span>
+                        <span class="button-text">Back</span>
+                    </button>
+                    <button id="next-btn" class="nav-button" disabled>
+                        <span class="button-text">Next</span>
+                        <span class="button-icon">→</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loading-overlay" class="loading-overlay">
+            <div class="loading-content">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Creating your magical story...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
