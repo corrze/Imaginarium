@@ -1,4 +1,7 @@
-// Pro Paywall JavaScript
+// Pro Paywall JavaScript with Firebase Integration
+import { getAuth } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+import { getFirestore, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+import { app, auth, db } from './firebase-config.js';
 
 document.addEventListener('DOMContentLoaded', function() {
     const upgradeBtn = document.getElementById('upgrade-btn');
@@ -17,33 +20,33 @@ async function handleUpgrade() {
     button.disabled = true;
     
     try {
-        // Create checkout session
-        const response = await fetch('/create-checkout-session', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                priceId: 'price_pro_monthly', // Stripe price ID
-                successUrl: window.location.origin + '/success',
-                cancelUrl: window.location.origin + '/pro'
-            })
-        });
-        
-        if (!response.ok) {
-            throw new Error('Failed to create checkout session');
+        // Check if user is logged in
+        const user = auth.currentUser;
+        if (!user) {
+            throw new Error('Please log in to upgrade to Pro');
         }
         
-        const { url } = await response.json();
+        // For hackathon: Mock the payment process
+        // Update the user's membership level in Firestore
+        await updateDoc(doc(db, "users", user.uid), {
+            membershipLevel: "Pro",
+            membershipExpiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days from now
+            lastUpdated: new Date().toISOString()
+        });
         
-        // Redirect to Stripe Checkout
-        window.location.href = url;
+        // Show success message
+        showSuccess('Successfully upgraded to Pro! Redirecting to Pro dashboard...');
+        
+        // Redirect to Pro dashboard
+        setTimeout(() => {
+            window.location.href = '/pro-dashboard.html';
+        }, 2000);
         
     } catch (error) {
-        console.error('Error creating checkout session:', error);
+        console.error('Error upgrading to Pro:', error);
         
         // Show error message
-        showError('Failed to start checkout. Please try again.');
+        showError(error.message || 'Failed to upgrade. Please try again.');
         
         // Reset button
         button.innerHTML = originalText;
@@ -51,6 +54,7 @@ async function handleUpgrade() {
     }
 }
 
+// Rest of your code remains the same
 function showError(message) {
     // Create error notification
     const errorDiv = document.createElement('div');
@@ -76,6 +80,34 @@ function showError(message) {
     setTimeout(() => {
         errorDiv.style.animation = 'slideOutRight 0.3s ease-out';
         setTimeout(() => errorDiv.remove(), 300);
+    }, 5000);
+}
+
+function showSuccess(message) {
+    // Create success notification
+    const successDiv = document.createElement('div');
+    successDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #10b981;
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 500;
+        z-index: 1000;
+        animation: slideInRight 0.3s ease-out;
+        max-width: 300px;
+    `;
+    successDiv.textContent = message;
+    
+    document.body.appendChild(successDiv);
+    
+    // Remove after 5 seconds
+    setTimeout(() => {
+        successDiv.style.animation = 'slideOutRight 0.3s ease-out';
+        setTimeout(() => successDiv.remove(), 300);
     }, 5000);
 }
 
