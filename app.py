@@ -8,7 +8,13 @@ import stripe
 from PIL import Image
 
 app = Flask(__name__, template_folder='public/templates')
-CORS(app)  # Enable CORS for frontend communication
+CORS(app, resources={
+    r"/api/*": {
+        "origins": "*",
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type"]
+    }
+})
 
 # Configure Stripe (test mode)
 stripe.api_key = os.getenv('STRIPE_SECRET_KEY', 'sk_test_51234567890abcdefghijklmnopqrstuvwxyz')
@@ -371,5 +377,5 @@ def payment_cancel():
 
 if __name__ == '__main__':
     os.makedirs('public/static/images', exist_ok=True)
-    port = int(os.environ.get('PORT', 5000))
+    port = int(os.environ.get('PORT') or 5000)
     app.run(debug=False, host='0.0.0.0', port=port)
