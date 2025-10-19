@@ -6,10 +6,8 @@ import {
   signOut
 } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
 import { getFirestore, doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
-import { app, auth } from './firebase-config.js';
+import { app, auth, db } from './firebase-config.js';
 
-// Initialize Firestore using the app from config
-const db = getFirestore(app);
 
 // User registration
 export const registerUser = async (email, password, isChild, parentEmail = null) => {

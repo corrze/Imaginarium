@@ -118,14 +118,11 @@
     </div>
 
     <!-- Modular JavaScript Structure -->
+    <script src="https://js.stripe.com/v3/"></script>
     <script type="module">
         // Import Firebase configuration
-        import { app, auth } from './firebase-config.js';
-        import { getFirestore } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
-    
-        // Initialize Firestore (since you don't export it from config)
-        const db = getFirestore(app);
-    
+        import { app, auth, db } from './firebase-config.js';
+  
         // Make Firebase services available globally
         window.firebaseApp = app;
         window.firebaseAuth = auth;
